@@ -1,0 +1,43 @@
+.ttyscreen {
+	background: #000000;
+	color: #aaaaaa;
+	white-space: pre;
+	font-family: monospace;
+	line-height: 1em;
+}
+
+.ttyscreen .cur { text-decoration: underline; }
+.ttyscreen .ul { text-decoration: underline; }
+.ttyscreen .bl { text-decoration: blink; }
+.ttyscreen .f0 { color: #000000; }
+.ttyscreen .f1 { color: #aa0000; }
+.ttyscreen .f2 { color: #00aa00; }
+.ttyscreen .f3 { color: #aa5500; }
+.ttyscreen .f4 { color: #0000aa; }
+.ttyscreen .f5 { color: #aa00aa; }
+.ttyscreen .f6 { color: #00aaaa; }
+.ttyscreen .f7 { color: #aaaaaa; }
+.ttyscreen .f8 { color: #555555; }
+.ttyscreen .f9 { color: #ff5555; }
+.ttyscreen .f10 { color: #55ff55; }
+.ttyscreen .f11 { color: #ffff55; }
+.ttyscreen .f12 { color: #5555ff; }
+.ttyscreen .f13 { color: #ff55ff; }
+.ttyscreen .f14 { color: #55ffff; }
+.ttyscreen .f15 { color: #ffffff; }
+.ttyscreen .b0 { background-color: #000000; }
+.ttyscreen .b1 { background-color: #aa0000; }
+.ttyscreen .b2 { background-color: #00aa00; }
+.ttyscreen .b3 { background-color: #aa5500; }
+.ttyscreen .b4 { background-color: #0000aa; }
+.ttyscreen .b5 { background-color: #aa00aa; }
+.ttyscreen .b6 { background-color: #00aaaa; }
+.ttyscreen .b7 { background-color: #aaaaaa; }
+.ttyscreen .b8 { background-color: #555555; }
+.ttyscreen .b9 { background-color: #ff5555; }
+.ttyscreen .b10 { background-color: #55ff55; }
+.ttyscreen .b11 { background-color: #ffff55; }
+.ttyscreen .b12 { background-color: #5555ff; }
+.ttyscreen .b13 { background-color: #ff55ff; }
+.ttyscreen .b14 { background-color: #55ffff; }
+.ttyscreen .b15 { background-color: #ffffff; }
