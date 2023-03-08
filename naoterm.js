@@ -444,7 +444,14 @@ function naoterm(wid, hei)
 		  if (a == 27) this.attr &= ~16;
 		  if (a == 28) this.attr &= ~32;
 	      } else if ((a >= 30) && (a <= 37)) this.color = a-30;
+              else if (a == 39) { this.color = this.def_color; this.attr &= ~1; }
 	      else if ((a >= 40) && (a <= 47)) this.bgcolor = a-40;
+              else if (a == 49) { this.bgcolor = this.def_bgcolor; this.attr &= ~1; }
+              else if ((a >= 90) && (a <= 97)) { this.color = a-90; this.attr |= 1; }
+              else if ((a >= 100) && (a <= 107)) { this.bgcolor = a-100; this.attr |= 1; }
+              else {
+                  debugwrite("<b>UNHANDLED setattr("+a+")</b>");
+              }
 	      debugwrite("setattr("+a+")");
 	  }
       }
@@ -696,17 +703,18 @@ function naoterm(wid, hei)
 		  break;
 	  case 'G': /* cursor to column */
 		  var amount = parseInt(param);
-		  if (isNaN(amount) || amount < 1) amount = 1;
-		  this.cursor_x = amount;
+	          if (isNaN(amount) || amount < 1) amount = 1;
+                  this.setcursorpos(amount - 1, this.cursor_y);
+		  /*this.cursor_x = amount;*/
 		  break;
-	      case 'm': /* set color and attr */
+	  case 'm': /* set color and attr */
 		  var attr = param.split(";");
 		  this.setattr(attr);
 		  break;
-	      case 's': /* save cursor pos */
+	  case 's': /* save cursor pos */
 		  this.savecursor();
 		   break;
-	      case 'u': /* restore cursor pos */
+	  case 'u': /* restore cursor pos */
 		  this.restorecursor();
 	      break;
           case 'd': /* VPA: Move cursor to the indicated row, current column. */
