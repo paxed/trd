@@ -3,7 +3,6 @@
 	color: #aaaaaa;
 	white-space: pre;
 	font-family: monospace;
-	line-height: 1em;
 }
 
 .ttyscreen .cur { text-decoration: underline; }

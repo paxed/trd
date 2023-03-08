@@ -5,7 +5,7 @@ var naoterminal = null;
 var current_frame = 0;
 var current_ttyrec = -1;
 var target_div_id = null;
-var current_speed = 1000;
+var current_speed = 500;
 var paused = 0;
 var timeout_handle = null;
 var current_delay = 0;
@@ -317,6 +317,8 @@ function loading_ttyrecframe(target)
 		    starttime = tmp;
 		}
 		debugwrite('Frame length: '+l.length);
+                debugwrite('Frame delay: '+delay);
+                debugwrite('pos: ' + current_ttyrec_pos);
 		l = l.substring(12);
 		//debugwrite(l+'<hr>');
 		naoterminal.writestr(l);

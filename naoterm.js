@@ -5,9 +5,9 @@ var debugging_string = '';
 function debugwrite(str, clear)
 {
     if (!show_debugging_info) return;
-    if (clear)
+    /*if (clear)
 	debugging_string = str;
-    else
+    else*/
 	debugging_string += '<br>'+str;
 }
 
@@ -309,7 +309,7 @@ function naoterm(wid, hei)
   this.clone = function()
       {
 	  debugwrite("clone()");
-	  return eval(this.toSource());
+          return Object.assign({}, this);
       }
 
   this.resize = function(wid,hei)
@@ -324,6 +324,8 @@ function naoterm(wid, hei)
 
 	  this.SCREEN_WID = wid;
 	  this.SCREEN_HEI = hei;
+
+	  debugwrite("DONE_resize("+wid+","+hei+")");
 
 	  delete this.screen;
 	  this.screen = new Array(wid * hei);
@@ -394,16 +396,28 @@ function naoterm(wid, hei)
 
   this.setcursorpos = function(x,y)
       {
+          if (x >= this.SCREEN_WID || y >= this.SCREEN_HEI) {
+              debugwrite("setcursorpos: Out of screen");
+	      this.resize(Math.max(this.SCREEN_WID, x+1),
+			  Math.max(this.SCREEN_HEI, y+1));
+          }
 	  this.cursor_x = (x < 0) ? 0 : x;
 	  this.cursor_y = (y < 0) ? 0 : y;
+	  debugwrite("setcursorpos("+x+","+y+")");
       }
 
   this.movecursorpos = function(x,y)
       {
+          if (x >= this.SCREEN_WID || y >= this.SCREEN_HEI) {
+              debugwrite("movecursorpos: Out of screen");
+	      this.resize(Math.max(this.SCREEN_WID, x+1),
+			  Math.max(this.SCREEN_HEI, y+1));
+          }
 	  this.cursor_x += x;
 	  if (this.cursor_x < 0) this.cursor_x = 0;
 	  this.cursor_y += y;
 	  if (this.cursor_y < 0) this.cursor_y = 0;
+	  debugwrite("movecursorpos("+x+","+y+")");
       }
 
   this.setattr = function(attr)
@@ -597,7 +611,7 @@ function naoterm(wid, hei)
 
   this.doescapecode = function(code, param)
       {
-	  /*debugwrite("doescapecode("+code.toDebugString()+","+param.toDebugString()+")");*/
+	  debugwrite("doescapecode("+code.toDebugString()+","+param.toDebugString()+")");
 	  switch (code) {
 	      default:
 	      debugwrite("<b>UNHANDLED ESCAPE CODE</b>: (code:"+code.toDebugString()+", param:"+param.toDebugString()+")");
@@ -613,7 +627,7 @@ function naoterm(wid, hei)
 		      if (this.cursor_y == 0) this.had_clrscr = 1;
 		      this.cleardown();
 		  } else {
-		      /*debugobj(param);*/
+		      debugobj(param);
 		  }
 		  break;
 	      case 'K': /* erase line */
@@ -624,7 +638,7 @@ function naoterm(wid, hei)
 		  } else if (param == '2') {
 		      this.clearline();
 		  } else {
-		      /*debugobj(param);*/
+		      debugobj(param);
 		  }
 		  break;
 	      case 'f':
@@ -632,10 +646,8 @@ function naoterm(wid, hei)
 		  var coord = param.split(";");
 		  if (param == undefined || isNaN(coord[0]) || coord[0] == undefined || coord[1] == undefined) {
 		      this.setcursorpos(0, 0);
-		      debugwrite("setcursorpos(0,0)");
 		  } else {
 		      this.setcursorpos(parseInt(coord[1])-1, parseInt(coord[0])-1);
-		      debugwrite("setcursorpos("+(parseInt(coord[0])-1)+","+(parseInt(coord[1])-1)+")");
 		  }
 		  break;
 	  case '@': /* insert blank chars */
@@ -700,12 +712,16 @@ function naoterm(wid, hei)
           case 'd': /* VPA: Move cursor to the indicated row, current column. */
 	      var amount = parseInt(param);
 	      if (isNaN(amount) || amount < 1) amount = 1;
-              this.cursor_y = amount;
+              this.setcursorpos(this.cursor_x, amount - 1);
+              /*this.cursor_y = amount - 1;*/
               break;
 	  case 'h':
 	  case 'l':
 	      if (param.charAt(0) == '?') this.handle_dec_set_reset((code == 'l'), param);
-	      else debugwrite("<b>UNHANDLED dec set or reset '"+param+"'</b>");
+	      else {
+                  this.handle_dec_set_reset((code == 'l'), param);
+                  //debugwrite("<b>UNHANDLED dec set or reset '"+param+"'</b>");
+              }
 	      break;
           case 't': /* Window manip, XTWINOPS */
               /* ignore; we're not going to change the browser window size/etc */
