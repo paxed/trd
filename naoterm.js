@@ -325,8 +325,6 @@ function naoterm(wid, hei)
 	  this.SCREEN_WID = wid;
 	  this.SCREEN_HEI = hei;
 
-	  debugwrite("DONE_resize("+wid+","+hei+")");
-
 	  delete this.screen;
 	  this.screen = new Array(wid * hei);
 
@@ -366,7 +364,7 @@ function naoterm(wid, hei)
 
 	      var tmpdata = {'color': this.color, 'bgcolor':this.bgcolor, 'attr':this.attr, 'char':c};
 	      this.set_data(this.cursor_x, this.cursor_y, tmpdata);
-	      this.cursor_x++;
+	      this.movecursorpos(1, 0);
 	  } else if (o == 15) {
 	      this.use_alt_charset = 0;
 	  } else if (o == 14) {
@@ -374,12 +372,14 @@ function naoterm(wid, hei)
 	  } else if (o == 13) {
 	      this.cursor_x = 0;
 	  } else if (o == 10) {
-	      this.cursor_y++;
+	      this.movecursorpos(0, 1);
 	  } else if (o == 9) {
-	      this.cursor_x++;
-	      this.cursor_x += (this.cursor_x % 9);
+              debugwrite("putchar(TAB)");
+              this.movecursorpos(1, 0);
+              this.movecursorpos((this.cursor_x % 9), 0);
 	  } else if (o == 8) {
-	      if (this.cursor_x > 0) this.cursor_x--;
+              debugwrite("putchar(BACKSPACE)");
+	      if (this.cursor_x > 0) this.movecursorpos(-1, 0);
 	  }
 
 	  if (this.hi_x <= this.cursor_x) this.hi_x = this.cursor_x+1;
@@ -407,12 +407,14 @@ function naoterm(wid, hei)
       }
 
   this.movecursorpos = function(x,y)
-      {
-          if (x >= this.SCREEN_WID || y >= this.SCREEN_HEI) {
+    {
+        /*
+          if ((this.cursor_x + x) >= this.SCREEN_WID || (this.cursor_y + y) >= this.SCREEN_HEI) {
               debugwrite("movecursorpos: Out of screen");
-	      this.resize(Math.max(this.SCREEN_WID, x+1),
-			  Math.max(this.SCREEN_HEI, y+1));
-          }
+	      this.resize(Math.max(this.SCREEN_WID, this.cursor_x+x+1),
+			  Math.max(this.SCREEN_HEI, this.cursor_y+y+1));
+                          }
+                          */
 	  this.cursor_x += x;
 	  if (this.cursor_x < 0) this.cursor_x = 0;
 	  this.cursor_y += y;
@@ -706,7 +708,17 @@ function naoterm(wid, hei)
 	          if (isNaN(amount) || amount < 1) amount = 1;
                   this.setcursorpos(amount - 1, this.cursor_y);
 		  /*this.cursor_x = amount;*/
-		  break;
+	          break;
+          case 'X':
+	      var amount = parseInt(param);
+	      if (isNaN(amount) || amount < 1) amount = 1;
+              var tmpx = this.cursor_x;
+              while (amount > 0) {
+                  amount--;
+                  this.putchar(" ");
+              }
+              this.setcursorpos(tmpx, this.cursor_y);
+              break;
 	  case 'm': /* set color and attr */
 		  var attr = param.split(";");
 		  this.setattr(attr);
@@ -721,7 +733,6 @@ function naoterm(wid, hei)
 	      var amount = parseInt(param);
 	      if (isNaN(amount) || amount < 1) amount = 1;
               this.setcursorpos(this.cursor_x, amount - 1);
-              /*this.cursor_y = amount - 1;*/
               break;
 	  case 'h':
 	  case 'l':
