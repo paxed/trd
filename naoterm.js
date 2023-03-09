@@ -340,12 +340,12 @@ function naoterm(wid, hei)
 
   this.putchar = function(chr)
       {
-	  //debugwrite("putchar("+chr+")");
 	  if (this.SCREEN_WID < (this.cursor_x+1) || this.SCREEN_HEI < (this.cursor_y+1)) {
 	      this.resize(Math.max(this.SCREEN_WID, this.cursor_x+1),
 			  Math.max(this.SCREEN_HEI, this.cursor_y+1));
 	  }
 	  var o = chr.charCodeAt(0);
+	  //debugwrite("putchar('"+chr+"') [code:"+o+"]");
 	  if (o >= 32) {
 	      var c = ' ';
 
@@ -361,6 +361,11 @@ function naoterm(wid, hei)
 		      c = chr;
 		  }
 	      }
+
+              if (c == '<')
+                  c = '&lt;';
+              else if (c == '&')
+                  c = '&amp;';
 
 	      var tmpdata = {'color': this.color, 'bgcolor':this.bgcolor, 'attr':this.attr, 'char':c};
 	      this.set_data(this.cursor_x, this.cursor_y, tmpdata);
@@ -380,7 +385,9 @@ function naoterm(wid, hei)
 	  } else if (o == 8) {
               debugwrite("putchar(BACKSPACE)");
 	      if (this.cursor_x > 0) this.movecursorpos(-1, 0);
-	  }
+	  } else {
+              debugwrite("<b>UNHANDLED putchar("+chr+")</b>");
+          }
 
 	  if (this.hi_x <= this.cursor_x) this.hi_x = this.cursor_x+1;
 	  if (this.hi_y <= this.cursor_y) this.hi_y = this.cursor_y+1;
