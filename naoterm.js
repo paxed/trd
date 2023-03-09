@@ -515,6 +515,14 @@ function naoterm(wid, hei)
               }
               else if (a == 39) { this.color = this.def_color; this.attr &= ~1; }
 	      else if ((a >= 40) && (a <= 47)) this.bgcolor = a-40;
+              else if (a == 48) {
+                  if (tmpidx+2 < attr.length && attr[tmpidx+1] == 5) {
+                      this.bgcolor = attr[tmpidx+2];
+                      break;
+                  } else {
+                      unhandled = 1;
+                  }
+              }
               else if (a == 49) { this.bgcolor = this.def_bgcolor; this.attr &= ~1; }
               else if ((a >= 90) && (a <= 97)) { this.color = a-90; this.attr |= 1; }
               else if ((a >= 100) && (a <= 107)) { this.bgcolor = a-100; this.attr |= 1; }
