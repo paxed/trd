@@ -92,6 +92,9 @@ function naoterm(wid, hei)
 
   this.saved_cursor_x = 0;
   this.saved_cursor_y = 0;
+  this.saved_attr = 0;
+  this.saved_color = 7;
+  this.saved_bgcolor = 0;
 
   this.attr = 0;
   this.color = 7;
@@ -208,12 +211,18 @@ function naoterm(wid, hei)
       {
 	  this.saved_cursor_x = this.cursor_x;
 	  this.saved_cursor_y = this.cursor_y;
+          this.saved_attr = this.attr;
+          this.saved_color = this.color;
+          this.saved_bgcolor = this.bgcolor;
       }
 
   this.restorecursor = function()
       {
 	  this.cursor_x = this.saved_cursor_x;
 	  this.cursor_y = this.saved_cursor_y;
+          this.attr = this.saved_attr;
+          this.color = this.saved_color;
+          this.bgcolor = this.saved_bgcolor;
       }
 
   this.clear = function()
@@ -887,10 +896,10 @@ function naoterm(wid, hei)
 		      var param = str.charAt(idx++);
 		      this.switch_charset(code, param);
 		      break;
-		  case '7': this.savecursor(); break; /* TODO: also saves attr */
-		  case '8': this.restorecursor(); break; /* TODO: also restores attr */
-		  case '>': break; /* ignored. numeric keypad mode */
-		  case '=': break; /* ignored. application keypad mode */
+		  case '7': this.savecursor(); idx++; break;
+		  case '8': this.restorecursor(); idx++; break;
+		  case '>': idx++; break; /* ignored. numeric keypad mode */
+		  case '=': idx++; break; /* ignored. application keypad mode */
 		  }
 	      } else {
 		  var chr = str.charAt(idx++);
