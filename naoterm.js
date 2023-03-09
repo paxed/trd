@@ -103,6 +103,8 @@ function naoterm(wid, hei)
   this.hi_x = this.SCREEN_WID;
   this.hi_y = this.SCREEN_HEI;
 
+  this.scroll_lines = [ 0, this.SCREEN_HEI - 1 ];
+
   this.screen = new Array(this.hi_x * this.hi_y);
 
   this.use_alt_charset = 0;
@@ -156,6 +158,51 @@ function naoterm(wid, hei)
 
 
   this.get_idx = function(x,y) { return y*(this.SCREEN_WID+1) + x; }
+
+    this.scroll_screen_down = function(numlines)
+    {
+        var a = this.scroll_lines[0];
+        var b = this.scroll_lines[1];
+
+        debugwrite("scroll_screen_down("+numlines+")");
+        while (numlines > 0) {
+            numlines--;
+            for (var y = b - 1; y >= a; y--) {
+                for (var x = 0; x < this.SCREEN_WID; x++) {
+                    var tmp = this.get_data(x, y);
+                    this.set_data(x, y+1, tmp);
+                }
+            }
+            for (var x = 0; x < this.SCREEN_WID; x++) {
+                this.clrcell(x, a);
+            }
+        }
+    }
+
+    this.scroll_screen = function(numlines)
+    {
+        if (numlines < 0) {
+            this.scroll_screen_down(-numlines);
+            return;
+        }
+
+        var a = this.scroll_lines[0];
+        var b = this.scroll_lines[1];
+
+        debugwrite("scroll_screen("+numlines+")");
+        while (numlines > 0) {
+            numlines--;
+            for (var y = a + 1; y <= b; y++) {
+                for (var x = 0; x < this.SCREEN_WID; x++) {
+                    var tmp = this.get_data(x, y);
+                    this.set_data(x, y-1, tmp);
+                }
+            }
+            for (var x = 0; x < this.SCREEN_WID; x++) {
+                this.clrcell(x, b);
+            }
+        }
+    }
 
   this.savecursor = function()
       {
@@ -427,6 +474,10 @@ function naoterm(wid, hei)
 	  this.cursor_y += y;
 	  if (this.cursor_y < 0) this.cursor_y = 0;
 	  debugwrite("movecursorpos("+x+","+y+")");
+        if (y == 1 && this.cursor_y > this.scroll_lines[1]) {
+            this.scroll_screen(1);
+            this.cursor_y--;
+        }
       }
 
   this.setattr = function(attr)
@@ -593,10 +644,11 @@ function naoterm(wid, hei)
       }
 
   this.handle_dec_set_reset = function(reset, param) /* DECSET/DECRST */
-      {
-	  var i = parseInt(param.substring(1));
+    {
+        var unhandled = 0;
+	  var i = parseInt(param);
 	  switch (i) {
-	  default: debugwrite("<b>UNHANDLED handle_dec_set_reset("+reset+","+param+")</b>");
+	  default: unhandled = 1;
 	      break;
 	  case 1: break; /* ignore, we don't care what cursor keys send */
 	  case 2: break; /* ANSI/vt52 mode */
@@ -605,6 +657,7 @@ function naoterm(wid, hei)
           case 7: break; /* no auto-wrap mode (DECAWM) */
 	  case 8: break; /* ignore, keyboard autorepeat */
 	  case 9: break; /* ignore, X11 mouse reporting */
+          case 12: break; /* ignore, stop blinking cursor */
 	  case 25: this.hidden_cursor = !reset; break;
 	  case 40: break; /* allow 132 cols */
 	  case 45: break; /* enable reverse wraparound */
@@ -623,6 +676,10 @@ function naoterm(wid, hei)
 		     "ESC [ ? 7 h"  (autowrap) */
 		  //break;
 	  }
+        var str = "handle_dec_set_reset("+reset+","+param+")";
+        if (unhandled)
+            str = "<b>UNHANDLED " + str + "</b>";
+        debugwrite(str);
       }
 
   this.doescapecode = function(code, param)
@@ -715,7 +772,12 @@ function naoterm(wid, hei)
 	          if (isNaN(amount) || amount < 1) amount = 1;
                   this.setcursorpos(amount - 1, this.cursor_y);
 		  /*this.cursor_x = amount;*/
-	          break;
+	      break;
+          case 'T':
+              var amount = parseInt(param);
+	      if (amount == undefined || isNaN(amount) || amount < 1) amount = 1;
+              this.scroll_screen(-amount);
+              break;
           case 'X':
 	      var amount = parseInt(param);
 	      if (isNaN(amount) || amount < 1) amount = 1;
@@ -732,7 +794,18 @@ function naoterm(wid, hei)
 		  break;
 	  case 's': /* save cursor pos */
 		  this.savecursor();
-		   break;
+	      break;
+          case 'r': /* DECSTBM: Set scrolling region */
+	      var lines = param.split(";");
+	      if (lines == undefined || isNaN(lines[0]) || lines[0] == undefined || lines[1] == undefined) {
+                  lines = [ 0, this.SCREEN_HEI - 1 ];
+              } else {
+                  lines[0]--;
+                  lines[1]--;
+              }
+              this.scroll_lines = lines;
+              debugwrite("set scroll lines: ("+lines[0]+","+lines[1]+")");
+              break;
 	  case 'u': /* restore cursor pos */
 		  this.restorecursor();
 	      break;
@@ -743,7 +816,7 @@ function naoterm(wid, hei)
               break;
 	  case 'h':
 	  case 'l':
-	      if (param.charAt(0) == '?') this.handle_dec_set_reset((code == 'l'), param);
+	      if (param.charAt(0) == '?') this.handle_dec_set_reset((code == 'l'), param.substring(1));
 	      else {
                   this.handle_dec_set_reset((code == 'l'), param);
                   //debugwrite("<b>UNHANDLED dec set or reset '"+param+"'</b>");
