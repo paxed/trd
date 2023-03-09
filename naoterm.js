@@ -425,7 +425,7 @@ function naoterm(wid, hei)
 
 	      var tmpdata = {'color': this.color, 'bgcolor':this.bgcolor, 'attr':this.attr, 'char':c};
 	      this.set_data(this.cursor_x, this.cursor_y, tmpdata);
-	      this.movecursorpos(1, 0);
+	      this.movecursorpos(1, 0, false);
 	  } else if (o == 15) {
 	      this.use_alt_charset = 0;
 	  } else if (o == 14) {
@@ -469,7 +469,7 @@ function naoterm(wid, hei)
 	  debugwrite("setcursorpos("+x+","+y+")");
       }
 
-  this.movecursorpos = function(x,y)
+    this.movecursorpos = function(x,y, nodebug)
     {
         /*
           if ((this.cursor_x + x) >= this.SCREEN_WID || (this.cursor_y + y) >= this.SCREEN_HEI) {
@@ -482,7 +482,8 @@ function naoterm(wid, hei)
 	  if (this.cursor_x < 0) this.cursor_x = 0;
 	  this.cursor_y += y;
 	  if (this.cursor_y < 0) this.cursor_y = 0;
-	  debugwrite("movecursorpos("+x+","+y+")");
+          if (nodebug == undefined)
+	      debugwrite("movecursorpos("+x+","+y+")");
         if (y == 1 && this.cursor_y > this.scroll_lines[1]) {
             this.scroll_screen(1);
             this.cursor_y--;
@@ -857,6 +858,7 @@ function naoterm(wid, hei)
 	      break;
           case 't': /* Window manip, XTWINOPS */
               /* ignore; we're not going to change the browser window size/etc */
+              /* maybe handle 8;height;width which is screen resize? */
               break;
 	  case 'z': /* NAO specific, vt_tiledata option */
 	      debugwrite("TODO: <b>vt_tiledata:</b> " + param);
@@ -923,7 +925,10 @@ function naoterm(wid, hei)
 		  }
 	      } else {
 		  var chr = str.charAt(idx++);
-		  wrotestr += chr;
+                  var wch = chr;
+                  if (wch == "<") wch = "&lt;";
+                  else if (wch == "&") wch = "&amp;";
+		  wrotestr += wch;
 		  this.putchar(chr);
 	      }
 	  }
