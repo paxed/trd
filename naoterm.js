@@ -704,6 +704,7 @@ function naoterm(wid, hei)
 	  case 1052: break; /* ignore. HP function keys */
 	  case 1060: break; /* ignore. xterm function keys */
 	  case 1061: break; /* ignore. vt220 function keys */
+          case 2004: break; /* ignore. bracketed paste mode. */
 		  /* should possibly handle:
 		     "ESC [ ? 5 h"  (reverse mode)
 		     "ESC [ ? 6 h"  (relative cursor)
