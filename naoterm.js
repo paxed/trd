@@ -876,7 +876,23 @@ function naoterm(wid, hei)
 		      this.errorstr += '<br><b>UNSUPPORTED: '+str.charAt(idx)+'</b>';
 		      idx++;
 		      break;
-		  case '[':
+                  case ']': /* ESC ], aka OSC */
+                      /* change colors; ignore */
+                      /* skip until we encounter ESC \ aka ST aka string terminator, or BEL */
+                      idx++;
+                      do {
+                          if (str.charAt(idx) == '\033' && str.charAt(idx+1) == '\\') {
+                              idx += 2;
+                              break;
+                          } else if (str.charAt(idx) == '\007') {
+                              idx++;
+                              break;
+                          } else {
+                              idx++;
+                          }
+                      } while (idx < str.length);
+                      break;
+		  case '[': /* ESC [, aka CSI sequences */
 		      idx++;
 		      while (!((str.charAt(idx) >= 'a' && str.charAt(idx) <= 'z') ||
 			       (str.charAt(idx) >= 'A' && str.charAt(idx) <= 'Z') ||
