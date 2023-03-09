@@ -495,17 +495,21 @@ function naoterm(wid, hei)
 	  if (!is_array) attr = new Array(attr);
 	  for (var tmpidx = 0; tmpidx < attr.length; tmpidx++) {
 	      var a = attr[tmpidx];
-	      if ((a >= 0) && (a <= 11)) {
-		  if (a == 0) { this.attr = 0; this.color = this.def_color; this.bgcolor = this.def_bgcolor; }
-		  if (a == 1) this.attr |= 1;
-		  if (a == 2) this.attr |= 2;
-		  if (a == 4) this.attr |= 4;
-		  if (a == 5) this.attr |= 8;
-		  if (a == 7) this.attr |= 16;
-		  if (a == 8) this.attr |= 32;
-		  if (a == 10) this.use_alt_charset = 0;
-		  if (a == 11) this.use_alt_charset = 2;
-
+              if (a == 0 || a == "") {
+                  this.attr = 0; this.color = this.def_color; this.bgcolor = this.def_bgcolor;
+              } else if ((a >= 0) && (a <= 11)) {
+                  switch (parseInt(a)) {
+                  case 1: this.attr |= 1; break; /* bold */
+		  case 2: this.attr |= 2; break; /* half-bright/dim */
+		  case 4: this.attr |= 4; break; /* underscore */
+		  case 5: this.attr |= 8; break; /* blink */
+		  case 7: this.attr |= 16; break; /* reverse video */
+		  case 8: this.attr |= 32; break; /* */
+		  case 10: this.use_alt_charset = 0; break;
+		  case 11: this.use_alt_charset = 2; break;
+                  default:
+                      unhandled = 1;
+                  }
 	      } else if ((a >= 20) && (a <= 28)) {
 		  if (a == 21) this.attr &= ~1;
 		  if (a == 22) this.attr &= ~2;

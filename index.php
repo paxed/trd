@@ -13,9 +13,9 @@ $pos = (isset($_GET['pos']) ? $_GET['pos'] : NULL);
 if (!$fname) {
     //$fname = "http://127.0.0.1/~paxed/trd/ttyrecs/2023-02-24.03:25:30.ttyrec.gz";
     //$fname = "http://127.0.0.1/~paxed/trd/ttyrecs/2023-02-16.19:06:03.ttyrec.gz";
-    //$fname = "http://127.0.0.1/~paxed/trd/ttyrecs/2023-03-08.19:38:00.ttyrec.gz";
+    $fname = "http://127.0.0.1/~paxed/trd/ttyrecs/2023-03-08.19:38:00.ttyrec.gz";
     //$fname = "http://127.0.0.1/~paxed/trd/ttyrecs/2023-03-04.21:24:01.ttyrec.gz";
-    $fname = "http://127.0.0.1/~paxed/trd/ttyrecs/2023-03-06.19:52:47.ttyrec.gz";
+    //$fname = "http://127.0.0.1/~paxed/trd/ttyrecs/2023-03-06.19:52:47.ttyrec.gz";
 }
 
 print '<html><head>';
