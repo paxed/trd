@@ -496,7 +496,7 @@ function naoterm(wid, hei)
 	  if (!is_array) attr = new Array(attr);
 	  for (var tmpidx = 0; tmpidx < attr.length; tmpidx++) {
 	      var a = parseInt(attr[tmpidx]);
-              if (a == 0 || attr[tmpidx] == "") {
+              if (a == 0 || attr[tmpidx] == undefined || attr[tmpidx] == "") {
                   this.attr = 0; this.color = this.def_color; this.bgcolor = this.def_bgcolor;
               } else if ((a >= 0) && (a <= 11)) {
                   switch (a) {
@@ -551,7 +551,7 @@ function naoterm(wid, hei)
               else {
                   unhandled = 1;
               }
-              var str = "setattr("+a+")";
+              var str = "setattr("+attr.join(";")+")";
               if (unhandled)
                   str = "<b>UNHANDLED " + str + "</b>";
 	      debugwrite(str);
