@@ -8,6 +8,8 @@
 .ttyscreen .cur { text-decoration: underline; }
 .ttyscreen .ul { text-decoration: underline; }
 .ttyscreen .bl { text-decoration: blink; }
+.ttyscreen .it { font-style: italic; }
+.ttyscreen .st { text-decoration: line-through; }
 .ttyscreen .f0 { color: #000000; }
 .ttyscreen .f1 { color: #aa0000; }
 .ttyscreen .f2 { color: #00aa00; }
