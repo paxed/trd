@@ -112,6 +112,7 @@ function naoterm(wid, hei)
 
   this.use_alt_charset = 0;
   this.had_clrscr = 0;
+  this.utf8 = 0;
 
   /* missing some chars */
     this.deccharset = {'`':'{', 'a':'&#x2592;', 'j':'-', 'k':'-', 'l':'-', 'm':'-', 'n':'-', 'q':'-', 't':'|', 'u':'|', 'v':'-', 'w':'-', 'x':'|', '~':'.'};
@@ -493,7 +494,7 @@ function naoterm(wid, hei)
   this.setattr = function(attr)
       {
           var unhandled = 0;
-	  if (!is_array) attr = new Array(attr);
+	  if (!Array.isArray(attr)) attr = new Array(attr);
 	  for (var tmpidx = 0; tmpidx < attr.length; tmpidx++) {
 	      var a = parseInt(attr[tmpidx]);
               if (a == 0 || attr[tmpidx] == undefined || attr[tmpidx] == "") {
@@ -551,11 +552,11 @@ function naoterm(wid, hei)
               else {
                   unhandled = 1;
               }
-              var str = "setattr("+attr.join(";")+")";
               if (unhandled)
-                  str = "<b>UNHANDLED " + str + "</b>";
-	      debugwrite(str);
+                  debugwrite("<b>UNHANDLED setattr(" + a + ")</b>");
 	  }
+          if (!unhandled)
+              debugwrite("setattr("+attr.join(";")+")");
       }
 
   this.getcellstyle_wiki = function(x,y)
@@ -890,9 +891,16 @@ function naoterm(wid, hei)
 		  idx++;
 		  switch (str.charAt(idx)) {
 		  default:
-		      this.errorstr += '<br><b>UNSUPPORTED: '+str.charAt(idx)+'</b>';
+		      debugwrite('<b>UNHANDLED ESCAPE CODE: '+str.charAt(idx)+'</b>');
 		      idx++;
 		      break;
+                  case '%':
+                      idx++;
+                      if (str.charAt(idx) == 'G') {
+                          this.utf8 = 1; /* TODO: actually do something with this */
+                      }
+                      idx++;
+                      break;
                   case ']': /* ESC ], aka OSC */
                       /* change colors; ignore */
                       /* skip until we encounter ESC \ aka ST aka string terminator, or BEL */
