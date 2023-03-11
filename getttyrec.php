@@ -39,7 +39,6 @@ if (allowed_files($fname)) {
 	$fname_tmp = "/tmp/trd/".basename($fname_nozip);
 
 	if (!file_exists($fname_tmp) || file_exists($fname_tmp) && (filectime($fname_tmp)+3600 < time())) {
-            print "BBB\n";
 	    /* exec("/bin/bzcat ".$fname_x." > ".$fname_tmp); */
             exec("/usr/bin/curl -s ".$fname." | /usr/bin/gunzip - > ".$fname_tmp);
 	}
