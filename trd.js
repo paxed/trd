@@ -322,6 +322,11 @@ function get_plrname(ttyrecfname)
 
 function ajax_load_ttyrec(ttyrec)
 {
+    if (ttyrec == undefined || ttyrec == "") {
+        ajax_load_random_ttyrec();
+        return;
+    }
+
     current_ttyrec = ttyrec;
 
     var url = NAOTERM_URL + "getttyrec.php?file="+encodeURIComponent(ttyrec)+"&slurp=1";
