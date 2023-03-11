@@ -83,7 +83,6 @@ function naoterm(wid, hei)
   this.SCREEN_WID = ((wid == undefined) ? 80 : wid);
   this.SCREEN_HEI = ((hei == undefined) ? 24 : hei);
 
-  this.screen;
   this.prevdata = undefined;
 
   this.hidden_cursor = 0;
@@ -347,17 +346,6 @@ function naoterm(wid, hei)
 	  var idx = this.get_idx(x,y);
 	  if (this.screen[idx] != undefined) { delete this.screen[idx]; }
 	  this.screen[idx] = data;
-	  /*
-	  this.screen[idx] = eval(data.toSource());
-	  */
-	  /*
-	  this.screen[idx] = new Array();
-	  this.screen[idx]['color'] = data['color'];
-	  this.screen[idx]['bgcolor'] = data['bgcolor'];
-	  this.screen[idx]['attr'] = data['attr'];
-	  this.screen[idx]['char'] = data['char'];
-	  */
-	  //	  this.screen[idx] = {'color': data['color'], 'bgcolor': data['bgcolor'], 'attr': data['attr'], 'char': data['char']};
       }
 
   this.get_data = function(x,y)
