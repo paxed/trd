@@ -1038,7 +1038,8 @@ function naoterm(wid, hei)
 	  while (idx < str.length) {
 	      if (str.charAt(idx) == '\033') {
 		  if (wrotestr.length > 0) {
-                      wrotestr = this.utf8decode(wrotestr);
+                      if (this.utf8)
+                          wrotestr = this.utf8decode(wrotestr);
                       this.putstr(wrotestr);
                       debugwrite("wrote '<tt style='background-color:#eee;'>"+wrotestr.toDebugString()+"</tt>'");
                       wrotestr = '';
@@ -1053,7 +1054,8 @@ function naoterm(wid, hei)
                   case '%':
                       idx++;
                       if (str.charAt(idx) == 'G') {
-                          this.utf8 = 1; /* TODO: actually do something with this */
+                          this.utf8 = 1;
+                          debugwrite("Using UTF-8");
                       }
                       idx++;
                       break;
@@ -1105,7 +1107,8 @@ function naoterm(wid, hei)
 	      }
 	  }
 	  if (wrotestr.length > 0) {
-              wrotestr = this.utf8decode(wrotestr);
+              if (this.utf8)
+                  wrotestr = this.utf8decode(wrotestr);
               this.putstr(wrotestr);
               debugwrite("wrote '<tt style='background-color:#eee;'>"+wrotestr.toDebugString()+"</tt>'");
               wrotestr = '';
