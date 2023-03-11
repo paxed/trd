@@ -41,7 +41,7 @@ print '
 <br>
 <b>Speed:</b><span id="speed_slider"></span><span id="speed_display"></span>
 -- 
-<b>Frame:</b>[<!--<button type="button" onclick="show_prev_frame();">&lt;</button>--><span id="frame_display"></span><button type="button" onclick="show_next_frame();">&gt;</button>]
+<b>Frame:</b>[<button type="button" onclick="goto_first_frame();">&#x23ee;</button><!--<button type="button" onclick="show_prev_frame();">&lt;</button>--><span id="frame_display"></span><button type="button" onclick="show_next_frame();">&gt;</button>]
 -- 
 <b>Term size:</b>[<span id="termsize_display"></span>]
 <br>

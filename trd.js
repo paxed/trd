@@ -95,6 +95,15 @@ function play_next_frame()
     show_current_frame();
 }
 
+function goto_first_frame()
+{
+    toggle_pause_playback(1);
+    current_frame = 0;
+    if (naoterminal)
+        delete naoterminal;
+    show_current_frame();
+}
+
 function toggle_pause_playback(state)
 {
     if (state != undefined)
