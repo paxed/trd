@@ -527,7 +527,7 @@ function naoterm(wid, hei)
                   default:
                       unhandled = 1;
                   }
-	      } else if ((a >= 30) && (a <= 37)) this.color = a-30;
+	      } else if ((a >= 30) && (a <= 37)) { this.color = a-30; this.attr &= ~1; }
               else if (a == 38) {
                   if (tmpidx+2 < attr.length && attr[tmpidx+1] == 5) {
                       this.color = parseInt(attr[tmpidx+2]);

@@ -11,15 +11,15 @@ $fname = (isset($_GET['file']) ? $_GET['file'] : NULL);
 $pos = (isset($_GET['pos']) ? $_GET['pos'] : NULL);
 
 if (!$fname) {
-    //$fname = "http://127.0.0.1/~paxed/trd/ttyrecs/2023-02-24.03:25:30.ttyrec.gz";
+    $fname = "http://127.0.0.1/~paxed/trd/ttyrecs/2023-02-24.03:25:30.ttyrec.gz";
     //$fname = "http://127.0.0.1/~paxed/trd/ttyrecs/2023-02-16.19:06:03.ttyrec.gz";
-    $fname = "http://127.0.0.1/~paxed/trd/ttyrecs/2023-03-08.19:38:00.ttyrec.gz";
+    // $fname = "http://127.0.0.1/~paxed/trd/ttyrecs/2023-03-08.19:38:00.ttyrec.gz";
     //$fname = "http://127.0.0.1/~paxed/trd/ttyrecs/2023-03-04.21:24:01.ttyrec.gz";
     //$fname = "http://127.0.0.1/~paxed/trd/ttyrecs/2023-03-06.19:52:47.ttyrec.gz";
     //$fname = "http://127.0.0.1/~paxed/trd/ttyrecs/2023-01-07.18:22:13.ttyrec.gz";
     //$fname = "http://127.0.0.1/~paxed/trd/ttyrecs/2022-06-22.18:51:13.ttyrec.gz";
     //$fname = "http://127.0.0.1/~paxed/trd/ttyrecs/2023-03-09.18-44-25.ttyrec.gz";
-    $fname = "http://127.0.0.1/~paxed/trd/ttyrecs/2023-03-10.10-10-25.ttyrec.gz";
+    //$fname = "http://127.0.0.1/~paxed/trd/ttyrecs/2023-03-10.10-10-25.ttyrec.gz";
 }
 
 print '<html><head>';
