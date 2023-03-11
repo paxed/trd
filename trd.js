@@ -213,18 +213,6 @@ function timediff(t1, t2)
     return str;
 }
 
-function next_frame(adj)
-{
-    show_next_frame();
-    /*
-    if (adj == undefined) adj = 1;
-    if (adj > 0) {
-	toggle_pause_playback(1);
-	ajax_load_ttyrec(current_ttyrec);
-        }
-        */
-}
-
 String.prototype.get_long = function(pos, len)
 {
     var tmp = 0;
