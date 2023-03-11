@@ -1,7 +1,7 @@
 
 var NAOTERM_URL = "";
 var DEBUG_INFO = 0;
-var SPEED = { min: 20, current: 500, max: 1000, adj: 20 };
+var SPEED = { min: 20, current: 500, max: 1000, step: 20 };
 var MAX_PAUSE = 1500;
 
 /* ******************* */
@@ -15,7 +15,21 @@ var paused = 0;
 var current_frame = 0;
 var ttyrec_frames = new Array();
 
+var speed_slider_set = 0;
+
 function $(e) { return document.getElementById(e); }
+
+function set_speed_slider()
+{
+    if (!speed_slider_set) {
+        btn = $("speed_slider");
+        if (btn) {
+            btn.innerHTML = "<input id='speed_slider_input' type='range' min='"+SPEED.min+"' max='"+SPEED.max+"' value='"+SPEED.current+"' step='"+SPEED.step+"'></input>";
+        }
+        speed_slider_set = 1;
+    }
+
+}
 
 function show_current_frame()
 {
@@ -54,6 +68,8 @@ function show_current_frame()
     btn = $("frame_delay_display");
     if (btn)
 	btn.innerHTML = frame.delay.toString()+"s";
+
+    set_speed_slider();
 
     show_debug_info();
 }
@@ -110,17 +126,19 @@ function toggle_debug(state)
     return false;
 }
 
-function adj_speed(adj)
+function set_speed(val)
 {
-    var s = SPEED.current + (Math.sign(adj) * SPEED.adj);
     if (s < 0 || (SPEED.min > 0 && s < SPEED.min))
         return;
     if (SPEED.max > 0 && s > SPEED.max)
         return;
     SPEED.current = s;
+    console.log("SPEED:" + SPEED.current);
     btn = $("speed_display");
     if (btn)
 	btn.innerHTML = SPEED.current.toString();
+
+    set_speed_slider();
 }
 
 function playback_ttyrec()
@@ -130,6 +148,10 @@ function playback_ttyrec()
 
     play_next_frame();
     var frame = ttyrec_frames[current_frame];
+
+    btn = $("speed_slider_input");
+    if (btn)
+        SPEED.current = btn.value;
 
     var delay = (frame.delay + 1) * SPEED.current;
     if (delay > MAX_PAUSE)

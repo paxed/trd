@@ -5,9 +5,9 @@ var debugging_string = '';
 function debugwrite(str, clear)
 {
     if (!show_debugging_info) return;
-    /*if (clear)
+    if (clear)
 	debugging_string = str;
-    else*/
+    else
 	debugging_string += '<br>'+str;
 }
 

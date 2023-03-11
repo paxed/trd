@@ -1,3 +1,8 @@
+#debugdiv {
+    display: block;
+    clear: left;
+}
+
 button.selected {
     background-color: darkred;
     color: white;

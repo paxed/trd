@@ -59,7 +59,7 @@ print '
  <button type="button" onclick="toggle_debug();" id="debug_button">debug</button>]
 [<a href="#" onclick="show_screen_html();">show screen data</a>]
 <br>
-<b>Speed:</b>[<button type="button" onclick="adj_speed(-1);">&lt;</button><span id="speed_display"></span><button type="button" onclick="adj_speed(1);">&gt;</button>]
+<b>Speed:</b><span id="speed_slider"></span><span id="speed_display"></span>
 -- 
 <b>Frame:</b>[<!--<button type="button" onclick="show_prev_frame();">&lt;</button>--><span id="frame_display"></span><button type="button" onclick="show_next_frame();">&gt;</button>]
 -- 
