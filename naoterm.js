@@ -640,12 +640,10 @@ function naoterm(wid, hei)
 		  var tmp = bg; bg = fg; fg = tmp;
 	      }
 	      */
-	      if (!((chr == ' ') && (style != ''))) {
-		  if (bg != undefined && bg != this.def_bgcolor)
-		      style += ' b'+bg;
-		  if (fg != undefined && (fg + bright*8) != this.def_color)
-		      style += ' f'+(fg + bright*8);
-	      }
+	      if (bg != undefined && bg != this.def_bgcolor)
+		  style += ' b'+bg;
+	      if (fg != undefined && (fg + bright*8) != this.def_color)
+		  style += ' f'+(fg + bright*8);
 	  }
 	  return style;
       }
