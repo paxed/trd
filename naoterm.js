@@ -514,8 +514,8 @@ function naoterm(wid, hei)
                   default:
                       unhandled = 1;
                   }
-	      } else if ((a >= 20) && (a <= 28)) {
-                  switch (parseInt(a)-20) {
+	      } else if ((a >= 20) && (a <= 29)) {
+                  switch (a-20) {
                   case 1: this.attr &= ~1; break; /* bold */
 		  case 2: this.attr &= ~2; break; /* half-bright/dim */
                   case 3: this.attr &= ~64; break; /* italic */
@@ -527,8 +527,9 @@ function naoterm(wid, hei)
                   default:
                       unhandled = 1;
                   }
-	      } else if ((a >= 30) && (a <= 37)) { this.color = a-30; this.attr &= ~1; }
+	      } else if ((a >= 30) && (a <= 37)) this.color = a-30;
               else if (a == 38) {
+                  /* Set fg color: CSI 38 ; 5 ; <color_index> m */
                   if (tmpidx+2 < attr.length && attr[tmpidx+1] == 5) {
                       this.color = parseInt(attr[tmpidx+2]);
                       break;
@@ -539,6 +540,7 @@ function naoterm(wid, hei)
               else if (a == 39) { this.color = this.def_color; this.attr &= ~1; }
 	      else if ((a >= 40) && (a <= 47)) this.bgcolor = a-40;
               else if (a == 48) {
+                  /* Set bg color: CSI 48 ; 5 ; <color_index> m */
                   if (tmpidx+2 < attr.length && attr[tmpidx+1] == 5) {
                       this.bgcolor = parseInt(attr[tmpidx+2]);
                       break;
