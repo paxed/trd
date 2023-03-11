@@ -84,6 +84,7 @@ function naoterm(wid, hei)
   this.SCREEN_HEI = ((hei == undefined) ? 24 : hei);
 
   this.screen;
+  this.prevdata = undefined;
 
   this.hidden_cursor = 0;
 
@@ -1035,6 +1036,10 @@ function naoterm(wid, hei)
 
   this.writestr = function(str)
       {
+        if (this.prevdata != undefined) {
+            str = this.prevdata + str;
+            this.prevdata = undefined;
+        }
 	  var idx = 0;
 	  this.had_clrscr = 0;
 	  var wrotestr = '';
@@ -1085,11 +1090,12 @@ function naoterm(wid, hei)
 			       (str.charAt(idx) == '@')) && (idx < str.length)) {
 			  param += str.charAt(idx++);
 		      }
-		      /*
-		      for (var ddd = -1; ddd < 3; ddd++) {
-			  debugwrite('idxcode='+ddd+':'+str.charAt(idx+ddd).toDebugString());
-		      }
-		      */
+                      if (idx >= str.length) {
+                          /* escape code was split between two ttyrec frames */
+                          /* TODO: need to handle this for all... */
+                          this.prevdata = "\033[" + param;
+                          break;
+                      }
 		      var code = str.charAt(idx++);
 		      this.doescapecode(code, param);
 		      break;

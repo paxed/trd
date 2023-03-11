@@ -9,8 +9,6 @@ var MAX_PAUSE = 1500;
 var naoterminal = new naoterm();
 var current_ttyrec = -1;
 var paused = 0;
-var frame_time = 0;
-var max_frames = -1;
 
 /* ******************* */
 
@@ -242,10 +240,8 @@ function calc_frame_delay(delay)
     var ret = 1;
     if (first_delay) {
 	starttime = delay;
-	frame_time = delay;
 	first_delay = 0;
     } else {
-	frame_time = delay;
 	var tmp = delay;
 	ret = (delay - starttime);
 	starttime = tmp;
@@ -284,7 +280,6 @@ function loading_ttyrec()
 	    if (!naoterminal) {
 		$("tty_loader_div").innerHTML = req.responseText;
 	    } else {
-		frame_time = 0;
                 ttyrec_frames = parse_ttyrec(unescape(req.responseText));
                 toggle_debug(DEBUG_INFO);
                 playback_ttyrec();
@@ -361,8 +356,6 @@ function loading_random_ttyrec()
     if (req.readyState == 4) { // Complete
 	if (req.status == 200) { // OK response
 	    current_frame = 0;
-	    frame_time = 0;
-	    max_frames = -1;
 	    first_delay = 1;
 	    starttime = 0;
 	    delete naoterminal;
