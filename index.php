@@ -15,15 +15,6 @@ print '<script src="trd.js"></script>';
 print '</head><body>';
 
 print '<h1>'.$title.'</h1>';
-echo '<p>DECgraphics and IBMgraphics might mess up the decoding.';
-
-echo '<p>Better way to watch the ttyrecs is to use a native program for playback. For linux and other sensible OSes, there\'s';
-echo ' <a href="http://www.stack.nl/~jilles/games/playttyrec.c">playttyrec.c</a> by Jilles Tjoelker,';
-echo ' <a href="http://www.chiark.greenend.org.uk/~sgtatham/ipbt/">IPBT</a> by Simon Tatham,';
-echo ' <a href="http://patch-tag.com/r/ais523/jettyplay">Jettyplay</a> by Alex Smith,';
-echo ' <a href="http://0xcc.net/ttyrec/">ttyplay and ttyrec</a> by Satoru Takabayashi, and others.';
-echo ' For Windows, you can use <a href="http://angband.pl/termrec.html">termplay</a>.';
-print '<p>';
 
 if (isset($fname)) {
     $fname = rawurldecode($fname);
