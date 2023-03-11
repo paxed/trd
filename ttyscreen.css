@@ -1,8 +1,25 @@
+button.selected {
+    background-color: darkred;
+    color: white;
+    font-weight: bold;
+}
+
+.ttyscreen_loader_div {
+    float: left;
+}
+
 .ttyscreen {
-	background: #000000;
-	color: #aaaaaa;
-	white-space: pre;
-	font-family: monospace;
+    background: #000000;
+    color: #aaaaaa;
+    white-space: pre;
+    font-family: monospace;
+    float: left;
+}
+
+.ttyscreen .ttyrow {
+    background: #000000;
+    color: #aaaaaa;
+    display: block;
 }
 
 .ttyscreen .cur { text-decoration: underline; }

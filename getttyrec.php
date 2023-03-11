@@ -20,6 +20,7 @@ function allowed_files($fname)
 
 $fname = rawurldecode($_GET['file']);
 $offset = (isset($_GET['pos']) ? $_GET['pos'] : 0);
+$slurp = (isset($_GET['slurp']) ? $_GET['slurp'] : 0);
 
 if (!preg_match('/^[0-9]+$/', $offset)) exit;
 
@@ -48,6 +49,13 @@ if (allowed_files($fname)) {
     if (is_readable($fname_x)) {
 	$fh = @fopen($fname_x, "r");
 	if (!$fh) exit;
+
+        if ($slurp) {
+            header('Content-Type: binary/octet-stream');
+            print rawurlencode(file_get_contents($fname_x));
+            return;
+        }
+
 	if (@fseek($fh, $offset) == -1) exit;
 
 	@fread($fh, 8); /* skip timing info */

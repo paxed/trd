@@ -297,19 +297,20 @@ function naoterm(wid, hei)
 	  var maxx = this.hi_x;
 	  var maxy = this.hi_y;
 
-	  var sret = "<span class='ttyscreen'>";
+	  var sret = "<div class='ttyscreen'>";
 	  var y = 0;
 	  while (y < maxy) {
 	      var x = 0;
+              sret += "<span class='ttyrow'>";
 	      while (x < maxx) {
 		  var dat = this.getcellspan(x,y, maxx);
 		  sret += dat['span'];
 		  x = parseInt(dat.x);
 	      }
-	      sret += "\n";
+	      sret += "</span>";
 	      y++;
 	  }
-	  sret += "</span>";
+	  sret += "</div>";
 	  return sret;
       }
 

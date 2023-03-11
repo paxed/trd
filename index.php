@@ -11,8 +11,8 @@ $fname = (isset($_GET['file']) ? $_GET['file'] : NULL);
 $pos = (isset($_GET['pos']) ? $_GET['pos'] : NULL);
 
 if (!$fname) {
-    //$fname = "http://127.0.0.1/~paxed/trd/ttyrecs/2023-02-24.03:25:30.ttyrec.gz";
-    $fname = "http://127.0.0.1/~paxed/trd/ttyrecs/2023-02-16.19:06:03.ttyrec.gz";
+    $fname = "http://127.0.0.1/~paxed/trd/ttyrecs/2023-02-24.03:25:30.ttyrec.gz";
+    //$fname = "http://127.0.0.1/~paxed/trd/ttyrecs/2023-02-16.19:06:03.ttyrec.gz";
     // $fname = "http://127.0.0.1/~paxed/trd/ttyrecs/2023-03-08.19:38:00.ttyrec.gz";
     //$fname = "http://127.0.0.1/~paxed/trd/ttyrecs/2023-03-04.21:24:01.ttyrec.gz";
     //$fname = "http://127.0.0.1/~paxed/trd/ttyrecs/2023-03-06.19:52:47.ttyrec.gz";
@@ -22,7 +22,7 @@ if (!$fname) {
     //$fname = "http://127.0.0.1/~paxed/trd/ttyrecs/2023-03-10.10-10-25.ttyrec.gz";
 }
 
-print '<html><head>';
+print '<!DOCTYPE html><html><head>';
 print '<title>'.$title.'</title>';
 print '<link rel="stylesheet" type="text/css" href="ttyscreen.css">';
 print '<script src="naoterm.js"></script>';
@@ -55,13 +55,13 @@ print '<p id="current_player_ttyrecs">';
 print '<p>';
 
 print '
-[<a href="#" onclick="toggle_pause_playback();" id="pause_button_text">pause</a>]
-[<a href="#" onclick="toggle_debug();" id="debug_button">debug</a>]
+[<button type="button" onclick="toggle_pause_playback();" id="pause_button_text">pause</button>
+ <button type="button" onclick="toggle_debug();" id="debug_button">debug</button>]
 [<a href="#" onclick="show_screen_html();">show screen data</a>]
 <br>
-<b>Speed:</b>[<a href="#" onclick="adj_speed(-100);">&lt;</a>] [<span id="speed_display"></span>] [<a href="#" onclick="adj_speed(100);">&gt;</a>]
+<b>Speed:</b>[<button type="button" onclick="adj_speed(-1);">&lt;</button><span id="speed_display"></span><button type="button" onclick="adj_speed(1);">&gt;</button>]
 -- 
-<b>Frame:</b>[<span id="frame_display"></span>][<span id="next_frame_button">&gt;</span>]
+<b>Frame:</b>[<!--<button type="button" onclick="show_prev_frame();">&lt;</button>--><span id="frame_display"></span><button type="button" onclick="show_next_frame();">&gt;</button>]
 -- 
 <b>Term size:</b>[<span id="termsize_display"></span>]
 <br>
@@ -72,10 +72,6 @@ print '
 <b>Delay:</b><span id="frame_delay_display"></span>
 ';
 
-print '<div style="float:right; width:33%; height:200px; margin-bottom:2em;"><b>Frame jump list:</b>';
-print '<div id="clrscr_frames" style="position:relative;height:100%;width:100%;overflow:scroll;"></div>';
-print '</div>';
-print '<p>';
 print '</div>';
 
 print '<div id="tty_loader_div"></div>';
@@ -89,7 +85,7 @@ print '<script type="text/javascript">';
 if (!isset($fname)) {
     print 'ajax_load_random_ttyrec("tty_loader_div");';
 } else {
-    print 'naoterminal = new naoterm(); ajax_load_ttyrecframe("'.$fname.'", "tty_loader_div"'.(isset($pos) ? ', '.$pos : '').');';
+    print 'ajax_load_ttyrec("'.$fname.'", "tty_loader_div");';
 }
 print '</script>';
 
