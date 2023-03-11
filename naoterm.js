@@ -755,7 +755,7 @@ function naoterm(wid, hei)
 	return output;
     }
 
-// Taken from https://mths.be/punycode
+    // Taken from https://mths.be/punycode
     this.ucs2encode = function(array) {
 	var length = array.length;
 	var index = -1;
@@ -773,6 +773,7 @@ function naoterm(wid, hei)
 	return output;
     }
 
+    /* taken from https://github.com/mathiasbynens/utf8.js/ */
     this.readContinuationByte = function() {
 	if (this.byteIndex >= this.byteCount) {
 	    throw Error('Invalid byte index');
@@ -789,6 +790,7 @@ function naoterm(wid, hei)
 	throw Error('Invalid continuation byte');
     }
 
+    /* taken from https://github.com/mathiasbynens/utf8.js/ */
     this.checkScalarValue = function(codePoint) {
 	if (codePoint >= 0xD800 && codePoint <= 0xDFFF) {
 	    throw Error(
@@ -798,6 +800,7 @@ function naoterm(wid, hei)
 	}
     }
 
+    /* taken from https://github.com/mathiasbynens/utf8.js/ */
     this.decodeSymbol = function() {
 	var byte1;
 	var byte2;
@@ -861,6 +864,7 @@ function naoterm(wid, hei)
 	throw Error('Invalid UTF-8 detected');
     }
 
+    /* taken from https://github.com/mathiasbynens/utf8.js/ */
     this.utf8decode = function(byteString)
     {
         this.byteArray = this.ucs2decode(byteString);
@@ -1097,10 +1101,7 @@ function naoterm(wid, hei)
 	      } else {
 		  var chr = str.charAt(idx++);
                   var wch = chr;
-                  //if (wch == "<") wch = "&lt;";
-                  //else if (wch == "&") wch = "&amp;";
 		  wrotestr += wch;
-		  //this.putchar(chr);
 	      }
 	  }
 	  if (wrotestr.length > 0) {
