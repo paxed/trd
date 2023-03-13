@@ -70,7 +70,7 @@ function create_ui()
 
     btn = $("btn_pause");
     if (btn) {
-        btn.innerHTML = '<button type="button" onclick="toggle_pause_playback();" id="pause_button">pause</button>';
+        btn.innerHTML = '<button type="button" onclick="toggle_pause_playback();" id="pause_button">&#x23f8;</button>';
     }
 
     btn = $("btn_debug");
@@ -166,10 +166,10 @@ function toggle_pause_playback(state)
     else
         paused = !paused;
     if (paused) {
-        $("pause_button").innerHTML = "PAUSED";
+        $("pause_button").innerHTML = "&#x23f5;";
         $("pause_button").classList.add('selected');
     } else {
-        $("pause_button").innerHTML = "pause";
+        $("pause_button").innerHTML = "&#x23f8;";
         $("pause_button").classList.remove('selected');
         playback_ttyrec();
     }
