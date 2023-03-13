@@ -18,6 +18,8 @@ function allowed_files($fname)
        and do systemctl daemon-reload && systemctl restart apache2
  */
 
+if (!isset($_GET['file'])) exit;
+
 $fname = rawurldecode($_GET['file']);
 $offset = (isset($_GET['pos']) ? $_GET['pos'] : 0);
 $slurp = (isset($_GET['slurp']) ? $_GET['slurp'] : 0);
@@ -26,21 +28,32 @@ if (!preg_match('/^[0-9]+$/', $offset)) exit;
 
 if (allowed_files($fname)) {
 
-    if (!preg_match('/\.ttyrec(\.gz)?$/', $fname)) exit;
+    $regex_ext = "/\.ttyrec(\.(gz|bz2))?$/";
+
+    if (!preg_match($regex_ext, $fname)) exit;
 
     $fname = preg_replace('/\.\.+/', '.', $fname);
     //$fname = str_replace('..', '.', $fname);
 
     $fname_x = preg_replace('/^https?:\/\/alt\.org\/nethack\//','/var/www/alt.org/nethack/', $fname);
 
-    if (preg_match('/\.ttyrec\.gz$/', $fname_x)) {
-	$fname_nozip = substr($fname_x, 0, -3);
+    if (preg_match($regex_ext, $fname_x, $matches)) {
+        $compress_ext = isset($matches[1]) ? $matches[1] : "";
+        if ($compress_ext != "")
+            $fname_nozip = substr($fname_x, 0, -strlen($compress_ext));
+        else
+            $fname_nozip = $fname_x;
 
 	$fname_tmp = "/tmp/trd/".basename($fname_nozip);
 
 	if (!file_exists($fname_tmp) || file_exists($fname_tmp) && (filectime($fname_tmp)+3600 < time())) {
-	    /* exec("/bin/bzcat ".$fname_x." > ".$fname_tmp); */
-            exec("/usr/bin/curl -s ".$fname." | /usr/bin/gunzip - > ".$fname_tmp);
+            $unpackcmd = "";
+            switch ($compress_ext) {
+            case ".gz": $unpackcmd = " | /usr/bin/gunzip - "; break;
+            case ".bz2": $unpackcmd = " | /usr/bin/bunzip2 - "; break;
+            default: break;
+            }
+            exec("/usr/bin/curl -s " . $fname . $unpackcmd . " > " . $fname_tmp);
 	}
 	$fname_x = $fname_tmp;
     }
