@@ -1,9 +1,9 @@
 
 var NAOTERM_URL = "";
-var DEBUG_INFO = 1;
+var DEBUG_INFO = 0;
 var SPEED = { min: 20, current: 500, max: 1000, step: 20 };
 var MAX_PAUSE = 1500;
-var PAUSE_INITIAL = 1;
+var PAUSE_INITIAL = 0;
 var CACHEFRAMES = { n_previous: 10, every_nth: 50, max: 500 };
 
 /* ******************* */
@@ -11,9 +11,6 @@ var CACHEFRAMES = { n_previous: 10, every_nth: 50, max: 500 };
 var naoterminal = new naoterm();
 var current_ttyrec = -1;
 var paused = PAUSE_INITIAL;
-
-/* ******************* */
-
 var current_frame = 0;
 var first_cached_frame = -1;
 var last_cached_frame = -1;
