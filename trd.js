@@ -1,18 +1,23 @@
 
 var NAOTERM_URL = "";
-var DEBUG_INFO = 0;
+var DEBUG_INFO = 1;
 var SPEED = { min: 20, current: 500, max: 1000, step: 20 };
 var MAX_PAUSE = 1500;
+var PAUSE_INITIAL = 1;
+var CACHEFRAMES = { n_previous: 10, every_nth: 50, max: 500 };
 
 /* ******************* */
 
 var naoterminal = new naoterm();
 var current_ttyrec = -1;
-var paused = 0;
+var paused = PAUSE_INITIAL;
 
 /* ******************* */
 
 var current_frame = 0;
+var first_cached_frame = -1;
+var last_cached_frame = -1;
+var n_cached_frames = 0;
 var ttyrec_frames = new Array();
 
 var trd_ui_created = 0;
@@ -33,6 +38,7 @@ function create_ui()
     btn.innerHTML += '<div>Playing file <span id="current_ttyrec_link"></span></div>';
     btn.innerHTML += '<div>';
     btn.innerHTML += '<span id="btn_first"></span>';
+    btn.innerHTML += '<span id="btn_prev"></span>';
     btn.innerHTML += '<span id="btn_pause"></span>';
     btn.innerHTML += '<span id="frame_display"></span>';
     btn.innerHTML += '<span id="btn_next"></span>';
@@ -63,6 +69,11 @@ function create_ui()
         btn.innerHTML = '<button type="button" onclick="goto_first_frame();">&#x23ee;</button>';
     }
 
+    btn = $("btn_prev");
+    if (btn) {
+        btn.innerHTML = '<button type="button" onclick="show_prev_frame();">&lt;</button>';
+    }
+
     btn = $("btn_next");
     if (btn) {
         btn.innerHTML = '<button type="button" onclick="show_next_frame();">&gt;</button>';
@@ -83,6 +94,8 @@ function create_ui()
         btn.innerHTML = '<button type="button" onclick="show_screen_html();" id="screendata_button">screen data</button>';
     }
 
+    toggle_pause_btn();
+
     trd_ui_created = 1;
 }
 
@@ -95,7 +108,16 @@ function show_current_frame()
 
     if (naoterminal == undefined)
         naoterminal = new naoterm();
-    naoterminal.writestr(frame.data);
+    if (frame.term) {
+        naoterminal.copyFrom(frame.term);
+        debugwrite("[screen from cache]");
+    } else {
+        naoterminal.writestr(frame.data);
+        ttyrec_frames[current_frame].term = naoterminal.copy();
+        if (last_cached_frame < current_frame)
+            last_cached_frame = current_frame;
+        n_cached_frames++;
+    }
     $("tty_loader_div").innerHTML = naoterminal.get_html();
 
     btn = $("frame_display");
@@ -127,9 +149,50 @@ function show_current_frame()
     show_debug_info();
 }
 
+function update_cached_frames()
+{
+    if (current_frame > CACHEFRAMES.n_previous) {
+        if (ttyrec_frames[current_frame - CACHEFRAMES.n_previous].term != undefined) {
+            if (((current_frame - CACHEFRAMES.n_previous) % CACHEFRAMES.every_nth) != 0) {
+                delete ttyrec_frames[current_frame - CACHEFRAMES.n_previous].term;
+                n_cached_frames--;
+            }
+        }
+        if (CACHEFRAMES.max > 0 && n_cached_frames > CACHEFRAMES.max) {
+            if (first_cached_frame < 1)
+                first_cached_frame = 1;
+            if (last_cached_frame < 1)
+                last_cached_frame = ttyrec_frames.length;
+            for (var i = first_cached_frame;
+                 (i < last_cached_frame) && (n_cached_frames > CACHEFRAMES.max);
+                 i++) {
+                if (ttyrec_frames[i].term) {
+                    delete ttyrec_frames[i].term;
+                    first_cached_frame = i;
+                    if (last_cached_frame == i)
+                        last_cached_frame = -1;
+                    n_cached_frames--;
+                }
+            }
+        }
+    }
+}
+
+function find_prev_cached()
+{
+    var ret = current_frame;
+    while (ret-- > 0) {
+        if (ttyrec_frames[ret].term != undefined)
+            break;
+    }
+    return ret;
+}
+
 function show_next_frame()
 {
     toggle_pause_playback(1);
+    show_current_frame();
+    update_cached_frames();
     current_frame++;
     show_current_frame();
 }
@@ -137,15 +200,22 @@ function show_next_frame()
 function show_prev_frame()
 {
     toggle_pause_playback(1);
-    if (current_frame > 0)
-        current_frame--;
+    show_current_frame();
+    update_cached_frames();
+    current_frame = find_prev_cached();
     show_current_frame();
 }
 
 function play_next_frame()
 {
-    current_frame++;
-    show_current_frame();
+    if (current_frame < ttyrec_frames.length - 1) {
+        update_cached_frames();
+        current_frame++;
+        show_current_frame();
+    } else {
+        toggle_pause_playback(1);
+        show_current_frame();
+    }
 }
 
 function goto_first_frame()
@@ -159,18 +229,25 @@ function goto_first_frame()
     show_current_frame();
 }
 
-function toggle_pause_playback(state)
+function toggle_pause_btn()
 {
-    if (state != undefined)
-        paused = state;
-    else
-        paused = !paused;
     if (paused) {
         $("pause_button").innerHTML = "&#x23f5;";
         $("pause_button").classList.add('selected');
     } else {
         $("pause_button").innerHTML = "&#x23f8;";
         $("pause_button").classList.remove('selected');
+    }
+}
+
+function toggle_pause_playback(state)
+{
+    if (state != undefined)
+        paused = state;
+    else
+        paused = !paused;
+    toggle_pause_btn();
+    if (!paused) {
         playback_ttyrec();
     }
     return false;
@@ -353,6 +430,7 @@ function loading_ttyrec()
 	    } else {
                 ttyrec_frames = parse_ttyrec(unescape(req.responseText));
                 toggle_debug(DEBUG_INFO);
+                show_current_frame();
                 playback_ttyrec();
                 return;
 	    }
@@ -433,8 +511,11 @@ function loading_random_ttyrec()
     if (req.readyState == 4) { // Complete
 	if (req.status == 200) { // OK response
 	    current_frame = 0;
-	    first_delay = 1;
-	    starttime = 0;
+            first_cached_frame = -1;
+            last_cached_frame = -1;
+            n_cached_frames = 0;
+            delete ttyrec_frames;
+            reset_frame_delay();
 	    delete naoterminal;
 	    naoterminal = new naoterm();
 	    toggle_pause_playback(1);

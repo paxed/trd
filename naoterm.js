@@ -353,6 +353,51 @@ function naoterm(wid, hei)
 	  return this.screen[this.get_idx(x,y)];
       }
 
+    this.copy = function()
+    {
+        var ret = {};
+        var fields = ["SCREEN_WID", "SCREEN_HEI", "prevdata", "hidden_cursor",
+                      "cursor_x", "cursor_y", "saved_cursor_x", "saved_cursor_y",
+                      "saved_attr", "saved_color", "saved_bgcolor", "attr", "color",
+                      "bgcolor", "def_color", "def_bgcolor", "hi_x", "hi_y",
+                      "use_alt_charset", "had_clrscr", "utf8" ];
+
+        for (var i = 0; i < fields.length; i++) {
+            ret[fields[i]] = this[fields[i]];
+        }
+        ret.scroll_lines = [];
+        ret.scroll_lines[0] = this.scroll_lines[0];
+        ret.scroll_lines[1] = this.scroll_lines[1];
+
+        ret.screen = new Array(this.hi_x * this.hi_y);
+        for (var i = 0; i < this.screen.length; i++) {
+            if (this.screen[i] != undefined)
+                ret.screen[i] = Object.assign({}, this.screen[i]);
+        }
+        return ret;
+    }
+
+    this.copyFrom = function(data)
+    {
+        var fields = ["SCREEN_WID", "SCREEN_HEI", "prevdata", "hidden_cursor",
+                      "cursor_x", "cursor_y", "saved_cursor_x", "saved_cursor_y",
+                      "saved_attr", "saved_color", "saved_bgcolor", "attr", "color",
+                      "bgcolor", "def_color", "def_bgcolor", "hi_x", "hi_y",
+                      "use_alt_charset", "had_clrscr", "utf8" ];
+
+        for (var i = 0; i < fields.length; i++) {
+            this[fields[i]] = data[fields[i]];
+        }
+        this.scroll_lines[0] = data.scroll_lines[0];
+        this.scroll_lines[1] = data.scroll_lines[1];
+
+        this.screen = new Array(data.hi_x * data.hi_y);
+        for (var i = 0; i < data.screen.length; i++) {
+            if (data.screen[i] != undefined)
+                this.screen[i] = Object.assign({}, data.screen[i]);
+        }
+    }
+
   this.clone = function()
       {
 	  debugwrite("clone()");
@@ -378,7 +423,7 @@ function naoterm(wid, hei)
 	  for (y = 0; y < Math.min(this.SCREEN_HEI, tmppanel.SCREEN_HEI); y++) {
 	      for (x = 0; x < Math.min(this.SCREEN_WID, tmppanel.SCREEN_WID); x++) {
 		  var dat = tmppanel.get_data(x,y);
-		  if (dat != undefined) this.set_data(x,y, dat);
+		  if (dat != undefined) this.set_data(x,y, Object.assign({}, dat));
 	      }
 	  }
 
