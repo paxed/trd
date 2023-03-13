@@ -15,20 +15,75 @@ var paused = 0;
 var current_frame = 0;
 var ttyrec_frames = new Array();
 
-var speed_slider_set = 0;
+var trd_ui_created = 0;
 
 function $(e) { return document.getElementById(e); }
 
-function set_speed_slider()
+function create_ui()
 {
-    if (!speed_slider_set) {
-        btn = $("speed_slider");
-        if (btn) {
-            btn.innerHTML = "<input id='speed_slider_input' type='range' min='"+SPEED.min+"' max='"+SPEED.max+"' value='"+SPEED.current+"' step='"+SPEED.step+"'></input>";
-        }
-        speed_slider_set = 1;
+    if (trd_ui_created)
+        return;
+
+    btn = $("trd_ui");
+    if (!btn) {
+        console.error("No trd_ui id");
+        trd_ui_created = 1;
+    }
+    btn.innerHTML += '<div id="trd_ui_controls">';
+    btn.innerHTML += '<div>Playing file <span id="current_ttyrec_link"></span></div>';
+    btn.innerHTML += '<div>';
+    btn.innerHTML += '<span id="btn_first"></span>';
+    btn.innerHTML += '<span id="btn_pause"></span>';
+    btn.innerHTML += '<span id="frame_display"></span>';
+    btn.innerHTML += '<span id="btn_next"></span>';
+    btn.innerHTML += '<span class="divider"> | </span>';
+    btn.innerHTML += '<span id="btn_debug"></span>';
+    btn.innerHTML += '<span id="btn_screendata"></span>';
+    btn.innerHTML += '<span class="divider"> | </span>';
+    btn.innerHTML += '<span id="speed_slider"></span>';
+    btn.innerHTML += '</div>';
+    btn.innerHTML += '<div id="trd_ui_info">';
+    btn.innerHTML += '<span> <b>Size:</b><span id="termsize_display"></span></span>';
+    btn.innerHTML += '<span> <b>Time:</b><span id="frame_time_display"></span></span>';
+    btn.innerHTML += '<span> <b>Played:</b><span id="frame_playtime_display"></span></span>';
+    btn.innerHTML += '<span> <b>Delay:</b><span id="frame_delay_display"></span></span>';
+    btn.innerHTML += '</div>';
+    btn.innerHTML += '</div>';
+    btn.innerHTML += '<div id="tty_loader_div"></div>';
+    btn.innerHTML += '<div id="ttyscreen_html_div"></div>';
+    btn.innerHTML += '<div id="debugdiv"></div>';
+
+    btn = $("speed_slider");
+    if (btn) {
+        btn.innerHTML = "<span id='speed_slider'>Speed:<input id='speed_slider_input' type='range' min='"+SPEED.min+"' max='"+SPEED.max+"' value='"+SPEED.current+"' step='"+SPEED.step+"'></input><span id='speed_display'></span></span>";
     }
 
+    btn = $("btn_first");
+    if (btn) {
+        btn.innerHTML = '<button type="button" onclick="goto_first_frame();">&#x23ee;</button>';
+    }
+
+    btn = $("btn_next");
+    if (btn) {
+        btn.innerHTML = '<button type="button" onclick="show_next_frame();">&gt;</button>';
+    }
+
+    btn = $("btn_pause");
+    if (btn) {
+        btn.innerHTML = '<button type="button" onclick="toggle_pause_playback();" id="pause_button">pause</button>';
+    }
+
+    btn = $("btn_debug");
+    if (btn) {
+        btn.innerHTML = '<button type="button" onclick="toggle_debug();" id="debug_button">debug</button>';
+    }
+
+    btn = $("btn_screendata");
+    if (btn) {
+        btn.innerHTML = '<button type="button" onclick="show_screen_html();" id="screendata_button">screen data</button>';
+    }
+
+    trd_ui_created = 1;
 }
 
 function show_current_frame()
@@ -38,7 +93,7 @@ function show_current_frame()
     debugwrite("<hr>", 1);
     debugwrite("Frame #"+current_frame+": pos:"+frame.pos+",time:"+frame.time+"(delay:"+frame.delay+"),pagelen:"+frame.pagelen);
 
-    if (naoterminal == null)
+    if (naoterminal == undefined)
         naoterminal = new naoterm();
     naoterminal.writestr(frame.data);
     $("tty_loader_div").innerHTML = naoterminal.get_html();
@@ -69,8 +124,6 @@ function show_current_frame()
     if (btn)
 	btn.innerHTML = frame.delay.toString()+"s";
 
-    set_speed_slider();
-
     show_debug_info();
 }
 
@@ -99,8 +152,10 @@ function goto_first_frame()
 {
     toggle_pause_playback(1);
     current_frame = 0;
-    if (naoterminal)
+    if (naoterminal) {
         delete naoterminal;
+        naoterminal = undefined;
+    }
     show_current_frame();
 }
 
@@ -111,11 +166,11 @@ function toggle_pause_playback(state)
     else
         paused = !paused;
     if (paused) {
-        $("pause_button_text").innerHTML = "PAUSED";
-        $("pause_button_text").classList.add('selected');
+        $("pause_button").innerHTML = "PAUSED";
+        $("pause_button").classList.add('selected');
     } else {
-        $("pause_button_text").innerHTML = "pause";
-        $("pause_button_text").classList.remove('selected');
+        $("pause_button").innerHTML = "pause";
+        $("pause_button").classList.remove('selected');
         playback_ttyrec();
     }
     return false;
@@ -146,8 +201,6 @@ function set_speed(val)
     btn = $("speed_display");
     if (btn)
 	btn.innerHTML = SPEED.current.toString();
-
-    set_speed_slider();
 }
 
 function playback_ttyrec()
@@ -319,6 +372,7 @@ function get_plrname(ttyrecfname)
 
 function ajax_load_ttyrec(ttyrec)
 {
+    create_ui();
     if (ttyrec == undefined || ttyrec == "") {
         ajax_load_random_ttyrec();
         return;
