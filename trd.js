@@ -103,6 +103,9 @@ function show_current_frame()
 {
     var frame = ttyrec_frames[current_frame];
 
+    if (frame == undefined)
+        return;
+
     debugwrite("<hr>", 1);
     debugwrite("Frame #"+current_frame+": pos:"+frame.pos+",time:"+frame.time+"(delay:"+frame.delay+"),pagelen:"+frame.pagelen);
 
@@ -191,19 +194,23 @@ function find_prev_cached()
 function show_next_frame()
 {
     toggle_pause_playback(1);
-    show_current_frame();
-    update_cached_frames();
-    current_frame++;
-    show_current_frame();
+    if (current_frame < ttyrec_frames.length - 1) {
+        show_current_frame();
+        update_cached_frames();
+        current_frame++;
+        show_current_frame();
+    }
 }
 
 function show_prev_frame()
 {
     toggle_pause_playback(1);
-    show_current_frame();
-    update_cached_frames();
-    current_frame = find_prev_cached();
-    show_current_frame();
+    if (current_frame > 0) {
+        show_current_frame();
+        update_cached_frames();
+        current_frame = find_prev_cached();
+        show_current_frame();
+    }
 }
 
 function play_next_frame()
