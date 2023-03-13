@@ -583,7 +583,7 @@ function naoterm(wid, hei)
                       unhandled = 1;
                   }
               }
-              else if (a == 49) { this.bgcolor = this.def_bgcolor; this.attr &= ~1; }
+              else if (a == 49) { this.bgcolor = this.def_bgcolor; }
               else if ((a >= 90) && (a <= 97)) { this.color = a-90; this.attr |= 1; }
               else if ((a >= 100) && (a <= 107)) { this.bgcolor = a-100; this.attr |= 1; }
               else {
@@ -1110,9 +1110,13 @@ function naoterm(wid, hei)
                               idx++;
                               break;
                           } else {
+                              param += str.charAt(idx);
                               idx++;
                           }
                       } while (idx < str.length);
+                      debugwrite("<B>UNHANDLED OSC '" + param+ "'</B>");
+                      /* TODO: handle 10;xx (set default fg color) */
+                      /* TODO: handle 11;xx (set default bg color) */
                       break;
 		  case '[': /* ESC [, aka CSI sequences */
 		      idx++;
