@@ -197,7 +197,6 @@ function set_speed(val)
     if (SPEED.max > 0 && s > SPEED.max)
         return;
     SPEED.current = s;
-    console.log("SPEED:" + SPEED.current);
     btn = $("speed_display");
     if (btn)
 	btn.innerHTML = SPEED.current.toString();
