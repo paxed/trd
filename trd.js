@@ -455,7 +455,7 @@ function ajax_load_ttyrec(ttyrec)
 {
     create_ui();
     if (ttyrec == undefined || ttyrec == "") {
-        ajax_load_random_ttyrec();
+        //ajax_load_random_ttyrec();
         return;
     }
 
