@@ -464,7 +464,10 @@ function ajax_load_ttyrec(ttyrec)
     var url = NAOTERM_URL + "getttyrec.php?file="+encodeURIComponent(ttyrec)+"&slurp=1";
 
     var btn = $("current_ttyrec_link");
-    if (btn) btn.innerHTML = "<a href='"+current_ttyrec+"'>"+current_ttyrec+"</a>";
+    if (btn) {
+        current_ttyrec = current_ttyrec.replaceAll('<','&lt;').replaceAll('&','&amp;');
+        btn.innerHTML = "<a href='"+current_ttyrec+"'>"+current_ttyrec+"</a>";
+    }
 
     if (window.XMLHttpRequest) { // Non-IE browsers
 	req = new XMLHttpRequest();
