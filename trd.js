@@ -9,7 +9,8 @@ var PAUSE_UNHANDLED = 0; /* pause playback when encountering unhandled escape co
 
 /* ******************* */
 
-var naoterminal = new naoterm();
+var naoterm_params = { 'pause_on_unhandled': PAUSE_UNHANDLED };
+var naoterminal = new naoterm(naoterm_params);
 var current_ttyrec = -1;
 var paused = PAUSE_INITIAL;
 var current_frame = 0;
@@ -19,7 +20,6 @@ var n_cached_frames = 0;
 var ttyrec_frames = new Array();
 
 var trd_ui_created = 0;
-naoterminal.pause_on_unhandled = PAUSE_UNHANDLED;
 
 function $(e) { return document.getElementById(e); }
 
@@ -109,8 +109,7 @@ function show_current_frame()
     debugwrite("Frame #"+current_frame+": pos:"+frame.pos+",time:"+frame.time+"(delay:"+frame.delay+"),pagelen:"+frame.pagelen);
 
     if (naoterminal == undefined) {
-        naoterminal = new naoterm();
-        naoterminal.pause_on_unhandled = PAUSE_UNHANDLED;
+        naoterminal = new naoterm(naoterm_params);
     }
     if (frame.term) {
         naoterminal.copyFrom(frame.term);
@@ -533,8 +532,7 @@ function loading_random_ttyrec()
             delete ttyrec_frames;
             reset_frame_delay();
 	    delete naoterminal;
-	    naoterminal = new naoterm();
-            naoterminal.pause_on_unhandled = PAUSE_UNHANDLED;
+	    naoterminal = new naoterm(naoterm_params);
 	    toggle_pause_playback(1);
 	    ajax_load_ttyrec(req.responseText);
 	} else {

@@ -78,10 +78,10 @@ String.prototype.rtrim = function() {
 */
 
 
-function naoterm(wid, hei)
+function naoterm(params)
 {
-  this.SCREEN_WID = ((wid == undefined) ? 80 : wid);
-  this.SCREEN_HEI = ((hei == undefined) ? 24 : hei);
+  this.SCREEN_WID = 80;
+  this.SCREEN_HEI = 24;
 
   this.prevdata = undefined;
 
@@ -116,6 +116,20 @@ function naoterm(wid, hei)
   this.use_alt_charset = 0;
   this.had_clrscr = 0;
   this.utf8 = 0;
+
+
+    for (var i in params) {
+        if (i == "wid") {
+            this["SCREEN_WID"] = params[i];
+        } else if (i == "hei") {
+            this["SCREEN_HEI"] = params[i];
+        } else if (this.hasOwnProperty(i)) {
+            this[i] = params[i];
+        } else {
+            debugwrite("<b>ERROR: unknown naoterm param '"+i+"'</B>");
+        }
+    }
+
 
     this.replacechars = {
         '<': '&lt;',
