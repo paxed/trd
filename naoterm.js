@@ -251,6 +251,19 @@ function naoterm(params)
                 this.clrcell(i + numchars, this.cursor_y);
             }
         }
+        debugwrite("delete_chars("+numchars+")");
+    }
+
+    this.insert_blanks = function(numchars)
+    {
+        if (numchars < 0)
+            numchars = 1;
+
+        for (var x = this.SCREEN_WID - 1; x >= this.cursor_x; x--) {
+            var tmp = this.get_data(x, this.cursor_y);
+            this.set_data(x + 1, this.cursor_y, tmp);
+        }
+        debugwrite("insert_blanks("+numchars+")");
     }
 
   this.savecursor = function()
@@ -999,13 +1012,10 @@ function naoterm(params)
 		      this.setcursorpos(parseInt(coord[1])-1, parseInt(coord[0])-1);
 		  }
 		  break;
-	  case '@': /* insert blank chars */
+	  case '@': /* ICH: insert blank chars */
 		  var amount = parseInt(param);
-		  if (isNaN(amount) || amount < 1) amount = 1;
-		  while (amount > 0) {
-		      amount--;
-		      this.putchar(" ");
-		  }
+	          if (isNaN(amount) || amount < 1) amount = 1;
+                  this.insert_blanks(amount);
 		  break;
 	      case 'A': /* move cursor up */
 		  var amount = parseInt(param);
