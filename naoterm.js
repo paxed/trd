@@ -458,6 +458,8 @@ function naoterm(wid, hei)
                   c = '&lt;';
               else if (c == '&')
                   c = '&amp;';
+              else if (c == '-')
+                  c = '&ndash;';
 
 	      var tmpdata = {'color': this.color, 'bgcolor':this.bgcolor, 'attr':this.attr, 'char':c};
 	      this.set_data(this.cursor_x, this.cursor_y, tmpdata);
