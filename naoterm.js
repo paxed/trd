@@ -110,6 +110,9 @@ function naoterm(wid, hei)
 
   this.screen = new Array(this.hi_x * this.hi_y);
 
+  this.paused = 0;
+  this.pause_on_unhandled = 0;
+
   this.use_alt_charset = 0;
   this.had_clrscr = 0;
   this.utf8 = 0;
@@ -168,6 +171,13 @@ function naoterm(wid, hei)
 
 
   this.get_idx = function(x,y) { return y*(this.SCREEN_WID+1) + x; }
+
+    this.unhandled = function(str)
+    {
+        if (this.pause_on_unhandled)
+            this.paused = 1;
+        debugwrite("<B>UNHANDLED " + str + "</B>");
+    }
 
     this.scroll_screen_down = function(numlines)
     {
@@ -482,7 +492,7 @@ function naoterm(wid, hei)
               debugwrite("putchar(BACKSPACE)");
 	      if (this.cursor_x > 0) this.movecursorpos(-1, 0);
 	  } else {
-              debugwrite("<b>UNHANDLED putchar("+chr+")</b>");
+              this.unhandled("putchar("+chr+")");
           }
 
 	  if (this.hi_x <= this.cursor_x) this.hi_x = this.cursor_x+1;
@@ -594,7 +604,7 @@ function naoterm(wid, hei)
                   unhandled = 1;
               }
               if (unhandled)
-                  debugwrite("<b>UNHANDLED setattr(" + a + ")</b>");
+                  this.unhandled("setattr(" + a + ")");
 	  }
           if (!unhandled)
               debugwrite("setattr("+attr.join(";")+")");
@@ -763,8 +773,9 @@ function naoterm(wid, hei)
 	  }
         var str = "handle_dec_set_reset("+reset+","+param+")";
         if (unhandled)
-            str = "<b>UNHANDLED " + str + "</b>";
-        debugwrite(str);
+            this.unhandled(str);
+        else
+            debugwrite(str);
       }
 
     // Taken from https://mths.be/punycode
@@ -923,8 +934,8 @@ function naoterm(wid, hei)
 	  debugwrite("doescapecode("+code.toDebugString()+","+param.toDebugString()+")");
 	  switch (code) {
 	      default:
-	      debugwrite("<b>UNHANDLED ESCAPE CODE</b>: (code:"+code.toDebugString()+", param:"+param.toDebugString()+")");
-		  break;
+	          this.unhandled("ESCAPE CODE (code:"+code.toDebugString()+", param:"+param.toDebugString()+")");
+	          break;
 	      case 'J': /* erase screen */
 		  if ((param == '2') || (param == '3')) { /* whole screen */
 		      this.clear();
@@ -1071,6 +1082,8 @@ function naoterm(wid, hei)
 
   this.writestr = function(str)
       {
+          if (this.paused)
+              return;
         if (this.prevdata != undefined) {
             str = this.prevdata + str;
             this.prevdata = undefined;
@@ -1091,7 +1104,7 @@ function naoterm(wid, hei)
 		  idx++;
 		  switch (str.charAt(idx)) {
 		  default:
-		      debugwrite('<b>UNHANDLED ESCAPE CODE: '+str.charAt(idx)+'</b>');
+		      this.unhandled('ESCAPE CODE: '+str.charAt(idx));
 		      idx++;
 		      break;
                   case '%':
@@ -1118,7 +1131,7 @@ function naoterm(wid, hei)
                               idx++;
                           }
                       } while (idx < str.length);
-                      debugwrite("<B>UNHANDLED OSC '" + param+ "'</B>");
+                      this.unhandled("OSC '" + param+ "'");
                       /* TODO: handle 10;xx (set default fg color) */
                       /* TODO: handle 11;xx (set default bg color) */
                       break;
