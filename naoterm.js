@@ -87,6 +87,8 @@ function naoterm(params)
 
   this.hidden_cursor = 0;
 
+  this.XTWINOPS_resize = 0;
+
   this.cursor_x = 0;
   this.cursor_y = 0;
 
@@ -469,17 +471,16 @@ function naoterm(params)
 	  var tmppanel = this.clone();
 	  var x,y;
 
-	  if (wid > this.SCREEN_WID) wid += 10;
-	  if (hei > this.SCREEN_HEI) hei += 2;
-
 	  this.SCREEN_WID = wid;
 	  this.SCREEN_HEI = hei;
+          this.hi_x = wid;
+          this.hi_y = hei;
 
 	  delete this.screen;
 	  this.screen = new Array(wid * hei);
 
-	  for (y = 0; y < Math.min(this.SCREEN_HEI, tmppanel.SCREEN_HEI); y++) {
-	      for (x = 0; x < Math.min(this.SCREEN_WID, tmppanel.SCREEN_WID); x++) {
+	  for (y = 0; y < Math.max(this.SCREEN_HEI, tmppanel.SCREEN_HEI); y++) {
+	      for (x = 0; x < Math.max(this.SCREEN_WID, tmppanel.SCREEN_WID); x++) {
 		  var dat = tmppanel.get_data(x,y);
 		  if (dat != undefined) this.set_data(x,y, Object.assign({}, dat));
 	      }
@@ -795,6 +796,7 @@ function naoterm(params)
 	  case 9: break; /* ignore, X11 mouse reporting */
           case 12: break; /* ignore, stop blinking cursor */
 	  case 25: this.hidden_cursor = !reset; break;
+          case 34: break; /* ???? */
 	  case 40: break; /* allow 132 cols */
 	  case 45: break; /* enable reverse wraparound */
 	  case 47: break; /* TODO: switch to alternate buffer? */
@@ -1115,7 +1117,10 @@ function naoterm(params)
 	      break;
           case 't': /* Window manip, XTWINOPS */
               /* ignore; we're not going to change the browser window size/etc */
-              /* maybe handle 8;height;width which is screen resize? */
+	      var lines = param.split(";");
+              if (lines[0] == "8" && this.XTWINOPS_resize && !isNaN(lines[1]) && !isNaN(lines[2])) {
+                  this.resize(parseInt(lines[2]), parseInt(lines[1]));
+              }
               break;
 	  case 'z': /* NAO specific, vt_tiledata option */
 	      debugwrite("TODO: <b>vt_tiledata:</b> " + param);
@@ -1195,11 +1200,16 @@ function naoterm(params)
 		      var code = str.charAt(idx++);
 		      this.doescapecode(code, param);
 		      break;
-		  case '(':
+		  case '(': /* Designate G0 Character Set */
 		      var code = str.charAt(idx++);
 		      var param = str.charAt(idx++);
 		      this.switch_charset(code, param);
 		      break;
+                  case ')': /* Designate G1 Character Set */
+                     var code = str.charAt(idx++);
+                     var param = str.charAt(idx++);
+                      /* TODO: expand this.switch_charset(code, param); */
+                     break;
 		  case '7': this.savecursor(); idx++; break;
 		  case '8': this.restorecursor(); idx++; break;
 		  case '>': idx++; break; /* ignored. numeric keypad mode */

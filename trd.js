@@ -6,10 +6,11 @@ var MAX_PAUSE = 1500;
 var PAUSE_INITIAL = 0;
 var CACHEFRAMES = { n_previous: 10, every_nth: 50, max: 500 };
 var PAUSE_UNHANDLED = 0; /* pause playback when encountering unhandled escape code? */
+var XTWINOPS_resize = 0; /* 1: allow term resize via escape code, 0: resize when necessary */
 
 /* ******************* */
 
-var naoterm_params = { 'pause_on_unhandled': PAUSE_UNHANDLED };
+var naoterm_params = { 'pause_on_unhandled': PAUSE_UNHANDLED, 'XTWINOPS_resize': XTWINOPS_resize };
 var naoterminal = new naoterm(naoterm_params);
 var current_ttyrec = -1;
 var paused = PAUSE_INITIAL;
