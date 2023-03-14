@@ -31,6 +31,7 @@ if (allowed_files($fname)) {
     $regex_ext = "/\.ttyrec(\.(gz|bz2))?$/";
 
     if (!preg_match($regex_ext, $fname)) exit;
+    if (preg_match("/[\\%'\"]/", $fname)) exit;
 
     $fname = preg_replace('/\.\.+/', '.', $fname);
     //$fname = str_replace('..', '.', $fname);
@@ -53,7 +54,7 @@ if (allowed_files($fname)) {
             case ".bz2": $unpackcmd = " | /usr/bin/bunzip2 - "; break;
             default: break;
             }
-            exec("/usr/bin/curl -s " . $fname . $unpackcmd . " > " . $fname_tmp);
+            exec("/usr/bin/curl -s '" . $fname . "'" . $unpackcmd . " > '" . $fname_tmp . "'");
 	}
 	$fname_x = $fname_tmp;
     }
