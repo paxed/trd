@@ -238,6 +238,21 @@ function naoterm(params)
         }
     }
 
+    this.delete_chars = function(numchars)
+    {
+        if (numchars < 0)
+            numchars = 1;
+
+        for (var i = this.cursor_x; i < this.SCREEN_WID; i++) {
+            if (i + numchars < this.SCREEN_WID) {
+                var tmp = this.get_data(i + numchars, this.cursor_y);
+                this.set_data(i, this.cursor_y);
+            } else {
+                this.clrcell(i + numchars, this.cursor_y);
+            }
+        }
+    }
+
   this.savecursor = function()
       {
 	  this.saved_cursor_x = this.cursor_x;
@@ -1034,6 +1049,11 @@ function naoterm(params)
                   this.setcursorpos(amount - 1, this.cursor_y);
 		  /*this.cursor_x = amount;*/
 	      break;
+          case 'P': /* DCH: delete chars */
+              var amount = parseInt(param);
+              if (amount == undefined || isNaN(amount) || amount < 1) amount = 1;
+              this.delete_chars(amount);
+              break;
           case 'T':
               var amount = parseInt(param);
 	      if (amount == undefined || isNaN(amount) || amount < 1) amount = 1;
