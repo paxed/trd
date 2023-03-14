@@ -114,6 +114,12 @@ function naoterm(wid, hei)
   this.had_clrscr = 0;
   this.utf8 = 0;
 
+    this.replacechars = {
+        '<': '&lt;',
+        '&': '&amp;',
+        '-': '&ndash;',  /* looks better on most monospace web fonts */
+    };
+
   /* missing some chars */
     this.deccharset = {'`':'{', 'a':'&#x2592;', 'j':'-', 'k':'-', 'l':'-', 'm':'-', 'n':'-', 'q':'-', 't':'|', 'u':'|', 'v':'-', 'w':'-', 'x':'|', '~':'.'};
 
@@ -454,12 +460,8 @@ function naoterm(wid, hei)
 		  }
 	      }
 
-              if (c == '<')
-                  c = '&lt;';
-              else if (c == '&')
-                  c = '&amp;';
-              else if (c == '-')
-                  c = '&ndash;';
+              if (this.replacechars[c] != undefined)
+                  c = this.replacechars[c];
 
 	      var tmpdata = {'color': this.color, 'bgcolor':this.bgcolor, 'attr':this.attr, 'char':c};
 	      this.set_data(this.cursor_x, this.cursor_y, tmpdata);
