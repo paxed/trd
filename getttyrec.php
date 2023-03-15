@@ -33,24 +33,23 @@ if (allowed_files($fname)) {
     $regex_ext = "/\.ttyrec(\.(gz|bz2))?$/";
 
     if (!preg_match($regex_ext, $fname) ||
-        preg_match("/[\\%'\"]/", $fname))
+        preg_match("/[\\%'\"]$/", $fname))
         fake_ttyrec("Illegal file name");
 
     $fname = preg_replace('/\.\.+/', '.', $fname);
-    //$fname = str_replace('..', '.', $fname);
 
-    $fname_x = preg_replace('/^https?:\/\/alt\.org\/nethack\//','/var/www/alt.org/nethack/', $fname);
-
-    if (preg_match($regex_ext, $fname_x, $matches)) {
+    if (preg_match($regex_ext, $fname, $matches)) {
         $compress_ext = isset($matches[1]) ? $matches[1] : "";
         if ($compress_ext != "")
-            $fname_nozip = substr($fname_x, 0, -strlen($compress_ext));
+            $fname_nozip = substr($fname, 0, -strlen($compress_ext));
         else
-            $fname_nozip = $fname_x;
+            $fname_nozip = $fname;
 
 	$fname_tmp = "/tmp/trd/".basename($fname_nozip);
 
-	if (!file_exists($fname_tmp) || file_exists($fname_tmp) && (filectime($fname_tmp)+3600 < time())) {
+	if (!file_exists($fname_tmp) ||
+            file_exists($fname_tmp) && (filectime($fname_tmp)+3600 < time()
+                                        || filesize($fname_tmp) == 0)) {
             $unpackcmd = "";
             switch ($compress_ext) {
             case ".gz": $unpackcmd = " | /usr/bin/gunzip - "; break;
@@ -59,20 +58,25 @@ if (allowed_files($fname)) {
             }
             exec("/usr/bin/curl -f -s '" . $fname . "'" . $unpackcmd . " > '" . $fname_tmp . "'");
 	}
-	$fname_x = $fname_tmp;
-    }
+	$fname = $fname_tmp;
 
-    if (is_readable($fname_x)) {
-        $fsize = filesize($fname_x);
-        if ($fsize > $MAX_FILESIZE) {
-            fake_ttyrec("ttyrec too big");
-        } else if ($fsize == 0) {
-            fake_ttyrec("No such file");
+        if (is_readable($fname)) {
+            $fsize = filesize($fname);
+            if ($fsize > $MAX_FILESIZE) {
+                fake_ttyrec("ttyrec too big");
+            } else if ($fsize == 0) {
+                fake_ttyrec("No such file");
+            } else {
+                dump_ttyrec($fname);
+            }
         } else {
-            dump_ttyrec($fname_x);
+            fake_ttyrec("No such file");
         }
-    } else
-        fake_ttyrec("No such file");
+    } else {
+        fake_ttyrec("Unknown file type");
+    }
+} else {
+    fake_ttyrec("No such file");
 }
 
 function fake_ttyrec($error)
@@ -83,16 +87,16 @@ function fake_ttyrec($error)
     exit;
 }
 
-function dump_ttyrec($fname_x)
+function dump_ttyrec($fname)
 {
     header('Content-Type: binary/octet-stream');
-    print rawurlencode(file_get_contents($fname_x));
+    print rawurlencode(file_get_contents($fname));
     exit;
 }
 
-function dump_ttyrec_frame($fname_x, $offset)
+function dump_ttyrec_frame($fname, $offset)
 {
-    $fh = @fopen($fname_x, "r");
+    $fh = @fopen($fname, "r");
     if (!$fh) exit;
 
     if (@fseek($fh, $offset) == -1) exit;
