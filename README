@@ -1,0 +1,6 @@
+
+TTYREC viewer
+-------------
+
+Intended use is to view NetHack ttyrecs.
+Basically a clunky javascript terminal emulator and some wrapper stuff.
