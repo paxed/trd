@@ -1,0 +1,11 @@
+
+
+- is it possible to get rid of the rawurlencode in getttyrec.php
+  ... apparently with multipart/form-data?
+
+- speed value doesn't update while paused
+
+- add keyboard controls & help text for the keys
+
+- handle when escape codes are split in two ttyrec frames
+
