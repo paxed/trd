@@ -555,11 +555,11 @@ function loading_random_ttyrec()
 	    delete naoterminal;
 	    naoterminal = new naoterm(naoterm_params);
 	    toggle_pause_playback(1);
+            var fname = req.responseText.trim();
             if (req.responseText == "") {
                 random_ttyrec_error = 1;
                 return;
             }
-            var fname = req.responseText.replaceAll('\x0a', '');
             var currf = (new URLSearchParams(window.location.search)).get("file");
             if (currf == "" || currf == undefined) {
                 window.location.search = "?file=" + fname;

@@ -2,7 +2,7 @@
 
 /* return a random line from this file.
    it should contain public URLs to specific ttyrec files */
-$fname = '/tmp/trd/all_ttyrecs.txt';
+$fname = '/tmp/trd/rnd_ttyrecs.txt';
 
 if (is_readable($fname)) {
     $f_contents = file($fname);

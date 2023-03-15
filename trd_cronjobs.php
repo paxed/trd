@@ -5,7 +5,7 @@ $dir = "/tmp/trd/";
 @mkdir($dir);
 @chmod($dir, 0777);
 $starttime = time();
-$all_ttyrecs = $dir."all_ttyrecs.txt";
+$all_ttyrecs = $dir."rnd_ttyrecs.txt";
 
 /* if (@filemtime($all_ttyrecs) + 60*60*24*2 < $starttime) {
     print "Generating a list of all TTYRECS.\n";
