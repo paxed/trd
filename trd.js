@@ -297,6 +297,11 @@ function playback_ttyrec()
     if (paused)
         return;
 
+    if (ttyrec_frames.length < 1) {
+        load_random_ttyrec();
+        return;
+    }
+
     play_next_frame();
     var frame = ttyrec_frames[current_frame];
 
@@ -337,7 +342,6 @@ function show_screen_html()
 function load_random_ttyrec()
 {
 	toggle_pause_playback(1);
-        $('trd_error').style.display='none';
 	ajax_load_random_ttyrec();
 }
 
@@ -443,6 +447,7 @@ function loading_ttyrec()
 	    } else {
                 ttyrec_frames = parse_ttyrec(unescape(req.responseText));
                 toggle_debug(DEBUG_INFO);
+                toggle_pause_playback(PAUSE_INITIAL);
                 show_current_frame();
                 playback_ttyrec();
                 return;
@@ -464,7 +469,7 @@ function ajax_load_ttyrec(ttyrec)
 {
     create_ui();
     if (ttyrec == undefined || ttyrec == "") {
-        //ajax_load_random_ttyrec();
+        ajax_load_random_ttyrec();
         return;
     }
 
@@ -498,9 +503,13 @@ function ajax_load_ttyrec(ttyrec)
     }
 }
 
+var random_ttyrec_error = 0;
 function ajax_load_random_ttyrec()
 {
     var url = NAOTERM_URL + "rndttyrec.php";
+
+    if (random_ttyrec_error)
+        return;
 
     if (window.XMLHttpRequest) { // Non-IE browsers
 	req = new XMLHttpRequest();
@@ -509,6 +518,7 @@ function ajax_load_random_ttyrec()
 	    req.open("GET", url, true);
 	} catch (e) {
 	    toggle_pause_playback(1);
+            random_ttyrec_error = 1;
 	    alert(e);
 	}
 	req.send(null);
@@ -535,8 +545,14 @@ function loading_random_ttyrec()
 	    delete naoterminal;
 	    naoterminal = new naoterm(naoterm_params);
 	    toggle_pause_playback(1);
-	    ajax_load_ttyrec(req.responseText);
+            if (req.responseText == "") {
+                random_ttyrec_error = 1;
+                return;
+            }
+            var fname = req.responseText.replaceAll('\x0a', '');
+	    ajax_load_ttyrec(fname);
 	} else {
+            random_ttyrec_error = 1;
 	    toggle_pause_playback(1);
 	    alert("Error: " + req.statusText);
 	}
