@@ -83,7 +83,8 @@ function naoterm(params)
   this.SCREEN_WID = 80;
   this.SCREEN_HEI = 24;
 
-  this.prevdata = undefined;
+  this.input = [];
+  this.failed_input = 0;
 
   this.hidden_cursor = 0;
 
@@ -132,6 +133,24 @@ function naoterm(params)
         }
     }
 
+    this.get_input = function()
+    {
+        var ret = '';
+        if (this.input.length > 0 && !this.failed_input) {
+            var ret = this.input.shift();
+        }
+        return ret;
+    }
+    this.fail_input = function(str)
+    {
+        this.failed_input = 1;
+        this.unhandled("FAILED INPUT: '"+str+"'");
+        if (str != undefined) {
+            var tmp = str.split("");
+            this.input = tmp.concat(this.input);
+        }
+
+    }
 
     this.replacechars = {
         '<': '&lt;',
@@ -1066,6 +1085,11 @@ function naoterm(params)
               if (amount == undefined || isNaN(amount) || amount < 1) amount = 1;
               this.delete_chars(amount);
               break;
+          case 'S': /* SU: scroll up */
+              var amount = parseInt(param);
+	      if (amount == undefined || isNaN(amount) || amount < 1) amount = 1;
+              this.scroll_screen(amount);
+              break;
           case 'T':
               var amount = parseInt(param);
 	      if (amount == undefined || isNaN(amount) || amount < 1) amount = 1;
@@ -1129,19 +1153,20 @@ function naoterm(params)
       }
 
 
-  this.writestr = function(str)
+  this.writestr = function(datastr)
       {
           if (this.paused)
               return;
-        if (this.prevdata != undefined) {
-            str = this.prevdata + str;
-            this.prevdata = undefined;
-        }
-	  var idx = 0;
+          this.input = this.input.concat(datastr.split(""));
+          this.failed_input = 0;
 	  this.had_clrscr = 0;
 	  var wrotestr = '';
-	  while (idx < str.length) {
-	      if (str.charAt(idx) == '\033') {
+	  while (!this.failed_input) {
+              var inp = this.get_input();
+              if (inp == '') {
+                  /* failed to get the rest of the input, break out */
+                  break;
+              } else if (inp == '\033') {
 		  if (wrotestr.length > 0) {
                       if (this.utf8)
                           wrotestr = this.utf8decode(wrotestr);
@@ -1149,76 +1174,95 @@ function naoterm(params)
                       debugwrite("wrote '<tt style='background-color:#eee;'>"+wrotestr.toDebugString()+"</tt>'");
                       wrotestr = '';
                   }
-		  var param = '';
-		  idx++;
-		  switch (str.charAt(idx)) {
+                  var esccode = this.get_input();
+                  if (esccode == "") {
+                      this.fail_input("\033");
+                      return;
+                  }
+		  switch (esccode) {
 		  default:
-		      this.unhandled('ESCAPE CODE: '+str.charAt(idx));
-		      idx++;
+		      this.unhandled('ESCAPE CODE: '+esccode);
 		      break;
                   case '%':
-                      idx++;
-                      if (str.charAt(idx) == 'G') {
+                      var c1 = this.get_input();
+                      if (c1 == "") {
+                          this.fail_input("\033%");
+                          return;
+                      }
+                      if (c1 == 'G') {
                           this.utf8 = 1;
                           debugwrite("Using UTF-8");
                       }
-                      idx++;
                       break;
                   case ']': /* ESC ], aka OSC */
                       /* change colors; ignore */
-                      /* skip until we encounter ESC \ aka ST aka string terminator, or BEL */
-                      idx++;
+                      /* skip until we encounter BEL, or ESC \ aka ST aka string terminator */
+                      var c1;
+                      var c2;
+		      var param = '';
                       do {
-                          if (str.charAt(idx) == '\033' && str.charAt(idx+1) == '\\') {
-                              idx += 2;
+                          c1 = this.get_input();
+                          if (c1 == '\007') {
                               break;
-                          } else if (str.charAt(idx) == '\007') {
-                              idx++;
-                              break;
+                          } else if (c1 == '\033') {
+                              c2 = this.get_input();
+                              if (c2 == '\\')
+                                  break;
+                              else if (c2 == "") {
+                                  this.fail_input("\033]" + param + "\033");
+                                  return;
+                              }
+                          } else if (c1 == "") {
+                              this.fail_input("\033]" + param);
+                              return;
                           } else {
-                              param += str.charAt(idx);
-                              idx++;
+                              param += c1;
                           }
-                      } while (idx < str.length);
+                      } while (!this.failed_input);
                       this.unhandled("OSC '" + param+ "'");
                       /* TODO: handle 10;xx (set default fg color) */
                       /* TODO: handle 11;xx (set default bg color) */
                       break;
 		  case '[': /* ESC [, aka CSI sequences */
-		      idx++;
-		      while (!((str.charAt(idx) >= 'a' && str.charAt(idx) <= 'z') ||
-			       (str.charAt(idx) >= 'A' && str.charAt(idx) <= 'Z') ||
-			       (str.charAt(idx) == '@')) && (idx < str.length)) {
-			  param += str.charAt(idx++);
-		      }
-                      if (idx >= str.length) {
-                          /* escape code was split between two ttyrec frames */
-                          /* TODO: need to handle this for all... */
-                          this.prevdata = "\033[" + param;
-                          break;
-                      }
-		      var code = str.charAt(idx++);
-		      this.doescapecode(code, param);
+                      var c1;
+                      var param = '';
+                      do {
+                          c1 = this.get_input();
+                          if (c1 == "") {
+                              this.fail_input("\033[" + param);
+                              return;
+                          } else if ((c1 >= 'a' && c1 <= 'z')
+                                     || (c1 >= 'A' && c1 <= 'Z')
+                                     || (c1 == '@')) {
+                              this.doescapecode(c1, param);
+                              break;
+                          }
+                          param += c1;
+                      } while (!this.failed_input);
 		      break;
 		  case '(': /* Designate G0 Character Set */
-		      var code = str.charAt(idx++);
-		      var param = str.charAt(idx++);
-		      this.switch_charset(code, param);
+		      var param = this.get_input();
+                      if (param == "") {
+                          this.fail_input("\033(");
+                          return;
+                      }
+		      this.switch_charset(esccode, param);
 		      break;
                   case ')': /* Designate G1 Character Set */
-                     var code = str.charAt(idx++);
-                     var param = str.charAt(idx++);
-                      /* TODO: expand this.switch_charset(code, param); */
-                     break;
-		  case '7': this.savecursor(); idx++; break;
-		  case '8': this.restorecursor(); idx++; break;
-		  case '>': idx++; break; /* ignored. numeric keypad mode */
-		  case '=': idx++; break; /* ignored. application keypad mode */
+		      var param = this.get_input();
+                      if (param == "") {
+                          this.fail_input("\033)");
+                          return;
+                      }
+                      /* TODO: expand this.switch_charset(esccode, param); */
+                      break;
+		  case '7': this.savecursor(); break;
+		  case '8': this.restorecursor(); break;
+		  case '>': break; /* ignored. numeric keypad mode */
+		  case '=': break; /* ignored. application keypad mode */
 		  }
 	      } else {
-		  var chr = str.charAt(idx++);
-                  var wch = chr;
-		  wrotestr += wch;
+		  wrotestr += inp;
 	      }
 	  }
 	  if (wrotestr.length > 0) {
@@ -1228,6 +1272,8 @@ function naoterm(params)
               debugwrite("wrote '<tt style='background-color:#eee;'>"+wrotestr.toDebugString()+"</tt>'");
               wrotestr = '';
           }
+          if (this.input.length > 0)
+              this.unhandled("INPUT: '"+this.input.join("")+"'");
       }
 
 

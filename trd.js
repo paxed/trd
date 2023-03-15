@@ -303,6 +303,10 @@ function playback_ttyrec()
     }
 
     play_next_frame();
+
+    if (ttyrec_frames[current_frame] == undefined)
+        return;
+
     var frame = ttyrec_frames[current_frame];
 
     btn = $("speed_slider_input");
@@ -411,6 +415,8 @@ function calc_frame_delay(delay)
 	ret = (delay - starttime);
 	starttime = tmp;
     }
+    if (ret < 1)
+        ret = 1;
     return ret;
 }
 
@@ -440,11 +446,15 @@ function loading_ttyrec()
 {
     if (req.readyState == 4) { // Complete
 	if (req.status == 200) { // OK response
-	    var delay = 1;
-	    var delay_usec = 0;
 	    if (!naoterminal) {
 		$("tty_loader_div").innerHTML = req.responseText;
 	    } else {
+                reset_frame_delay();
+                delete ttyrec_frames;
+                current_frame = 0;
+                first_cached_frame = -1;
+                last_cached_frame = 0;
+                n_cached_frames = 0;
                 ttyrec_frames = parse_ttyrec(unescape(req.responseText));
                 toggle_debug(DEBUG_INFO);
                 toggle_pause_playback(PAUSE_INITIAL);

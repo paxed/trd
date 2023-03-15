@@ -12,6 +12,3 @@
 - allow toggling pause_on_unhandled and XTWINOPS_resize
 
 - remember debug/pause/etc states (cookies?)
-
-- handle when escape codes are split in two ttyrec frames
-
