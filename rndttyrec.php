@@ -1,11 +1,11 @@
 <?php
 
-/* return a random line from this file.
-   it should contain public URLs to specific ttyrec files */
-$fname = '/tmp/trd/rnd_ttyrecs.txt';
+include "config.php";
 
-if (is_readable($fname)) {
-    $f_contents = file($fname);
+/* return a random line from this file. */
+
+if (is_readable($RND_TTYRECS)) {
+    $f_contents = file($RND_TTYRECS);
     $line = $f_contents[rand(0, count($f_contents) - 1)];
     print $line;
 }
