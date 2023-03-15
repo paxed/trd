@@ -47,6 +47,11 @@ if (allowed_files($fname)) {
         else
             $fname_nozip = $fname;
 
+        if (!is_dir($CACHE_PATH)) {
+            if (!file_exists($CACHE_PATH))
+                @mkdir($CACHE_PATH);
+        }
+
 	$fname_tmp = $CACHE_PATH . "/" . basename($fname_nozip);
 
 	if (!file_exists($fname_tmp) ||
