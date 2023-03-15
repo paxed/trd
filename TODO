@@ -6,6 +6,12 @@
 - speed value doesn't update while paused
 
 - add keyboard controls & help text for the keys
+   - allow activating each ui button via keyboard
+   - toggle speed from current to fastest and back
+
+- allow toggling pause_on_unhandled and XTWINOPS_resize
+
+- remember debug/pause/etc states (cookies?)
 
 - handle when escape codes are split in two ttyrec frames
 
