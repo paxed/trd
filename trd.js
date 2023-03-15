@@ -7,6 +7,7 @@ var PAUSE_INITIAL = 0;
 var CACHEFRAMES = { n_previous: 10, every_nth: 50, max: 500 };
 var PAUSE_UNHANDLED = 0; /* pause playback when encountering unhandled escape code? */
 var XTWINOPS_resize = 0; /* 1: allow term resize via escape code, 0: resize when necessary */
+var ENABLE_RND_TTYREC = 1; /* 1: get "random" ttyrec via rndttyrec.php */
 
 /* ******************* */
 
@@ -42,6 +43,10 @@ function create_ui()
     btn.innerHTML += '<span id="btn_pause"></span>';
     btn.innerHTML += '<span id="frame_display"></span>';
     btn.innerHTML += '<span id="btn_next"></span>';
+    if (ENABLE_RND_TTYREC) {
+        btn.innerHTML += '<span class="divider"> | </span>';
+        btn.innerHTML += '<span id="btn_rnd_ttyrec"></span>';
+    }
     btn.innerHTML += '<span class="divider"> | </span>';
     btn.innerHTML += '<span id="btn_debug"></span>';
     btn.innerHTML += '<span id="btn_screendata"></span>';
@@ -92,6 +97,11 @@ function create_ui()
     btn = $("btn_screendata");
     if (btn) {
         btn.innerHTML = '<button type="button" onclick="show_screen_html();" id="screendata_button">screen data</button>';
+    }
+
+    btn = $("btn_rnd_ttyrec");
+    if (btn) {
+        btn.innerHTML = '<button type="button" onclick="window.location.search=\'\';" id="rnd_ttyrec_button">&#x1f500;</button>';
     }
 
     toggle_pause_btn();
@@ -518,7 +528,7 @@ function ajax_load_random_ttyrec()
 {
     var url = NAOTERM_URL + "rndttyrec.php";
 
-    if (random_ttyrec_error)
+    if (random_ttyrec_error || !ENABLE_RND_TTYREC)
         return;
 
     if (window.XMLHttpRequest) { // Non-IE browsers
