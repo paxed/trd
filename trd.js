@@ -560,7 +560,11 @@ function loading_random_ttyrec()
                 return;
             }
             var fname = req.responseText.replaceAll('\x0a', '');
-	    ajax_load_ttyrec(fname);
+            var currf = (new URLSearchParams(window.location.search)).get("file");
+            if (currf == "" || currf == undefined) {
+                window.location.search = "?file=" + fname;
+            }
+	    return;
 	} else {
             random_ttyrec_error = 1;
 	    toggle_pause_playback(1);
