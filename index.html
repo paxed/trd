@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>TTYREC viewer</title>
+  <link rel="stylesheet" type="text/css" href="ttyscreen.css">
+  <script src="naoterm.js"></script>
+  <script src="trd.js"></script>
+</head>
+<body>
+
+<h1>TTYREC viewer</h1>
+
+<div id="trd_ui"></div>
+
+<script type="text/javascript">
+ajax_load_ttyrec((new URLSearchParams(window.location.search)).get("file"));
+</script>
+
+</body>
+</html>
