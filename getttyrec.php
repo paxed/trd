@@ -4,6 +4,14 @@ error_reporting(E_ALL);
 ini_set('display_errors','On');
 
 $MAX_FILESIZE = 20000000;
+$CACHE_PATH = "/tmp/trd";
+$CACHE_TIME = 3600;
+$CURL_PRG = "/usr/bin/curl -f -s";
+$REGEX_EXT = "/\.ttyrec(\.(gz|bz2))?$/";
+$UNPACK_PRG = [
+               ".gz" => "/usr/bin/gunzip - ",
+               ".bz2" => "/usr/bin/bunzip2 - ",
+               ];
 
 function allowed_files($fname)
 {
@@ -23,51 +31,42 @@ if (!isset($_GET['file']))
     fake_ttyrec("No file given");
 
 $fname = rawurldecode($_GET['file']);
-//$offset = (isset($_GET['pos']) ? $_GET['pos'] : 0);
-//$slurp = (isset($_GET['slurp']) ? $_GET['slurp'] : 0);
-
-//if (!preg_match('/^[0-9]+$/', $offset)) exit;
 
 if (allowed_files($fname)) {
 
-    $regex_ext = "/\.ttyrec(\.(gz|bz2))?$/";
-
-    if (!preg_match($regex_ext, $fname) ||
-        preg_match("/[\\%'\"]$/", $fname))
+    if (!preg_match($REGEX_EXT, $fname) ||
+        !preg_match("/^[-a-zA-Z0-9:\/\.~_]+$/", $fname))
         fake_ttyrec("Illegal file name");
 
     $fname = preg_replace('/\.\.+/', '.', $fname);
 
-    if (preg_match($regex_ext, $fname, $matches)) {
+    if (preg_match($REGEX_EXT, $fname, $matches)) {
         $compress_ext = isset($matches[1]) ? $matches[1] : "";
         if ($compress_ext != "")
             $fname_nozip = substr($fname, 0, -strlen($compress_ext));
         else
             $fname_nozip = $fname;
 
-	$fname_tmp = "/tmp/trd/".basename($fname_nozip);
+	$fname_tmp = $CACHE_PATH . "/" . basename($fname_nozip);
 
 	if (!file_exists($fname_tmp) ||
-            file_exists($fname_tmp) && (filectime($fname_tmp)+3600 < time()
+            file_exists($fname_tmp) && (filectime($fname_tmp)+$CACHE_TIME < time()
                                         || filesize($fname_tmp) == 0)) {
             $unpackcmd = "";
-            switch ($compress_ext) {
-            case ".gz": $unpackcmd = " | /usr/bin/gunzip - "; break;
-            case ".bz2": $unpackcmd = " | /usr/bin/bunzip2 - "; break;
-            default: break;
-            }
-            exec("/usr/bin/curl -f -s '" . $fname . "'" . $unpackcmd . " > '" . $fname_tmp . "'");
-	}
-	$fname = $fname_tmp;
+            if (isset($UNPACK_PRG[$compress_ext]))
+                $unpackcmd = " | ".$UNPACK_PRG[$compress_ext];
 
-        if (is_readable($fname)) {
-            $fsize = filesize($fname);
+            exec($CURL_PRG . " '" . $fname . "'" . $unpackcmd . " > '" . $fname_tmp . "'");
+	}
+
+        if (is_readable($fname_tmp)) {
+            $fsize = filesize($fname_tmp);
             if ($fsize > $MAX_FILESIZE) {
                 fake_ttyrec("ttyrec too big");
             } else if ($fsize == 0) {
                 fake_ttyrec("No such file");
             } else {
-                dump_ttyrec($fname);
+                dump_ttyrec($fname_tmp);
             }
         } else {
             fake_ttyrec("No such file");
@@ -91,29 +90,6 @@ function dump_ttyrec($fname)
 {
     header('Content-Type: binary/octet-stream');
     print rawurlencode(file_get_contents($fname));
-    exit;
-}
-
-function dump_ttyrec_frame($fname, $offset)
-{
-    $fh = @fopen($fname, "r");
-    if (!$fh) exit;
-
-    if (@fseek($fh, $offset) == -1) exit;
-
-    @fread($fh, 8); /* skip timing info */
-    $lengthstr = @fread($fh, 4);
-    if (!$lengthstr) exit;
-    $dlen = ord($lengthstr[0]) | (ord($lengthstr[1]) << 8) | (ord($lengthstr[2]) << 16) | (ord($lengthstr[3]) << 24);
-
-    if ($dlen > 40000) exit;
-
-    @fseek($fh, $offset);
-
-    $dstr = rawurlencode(@fread($fh, $dlen + 8+4));
-    header('Content-Type: binary/octet-stream');
-    header('Content-Length: '.strlen($dstr));
-    print $dstr;
     exit;
 }
 
