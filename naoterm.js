@@ -98,7 +98,7 @@ function naoterm(params)
   this.hi_x = this.SCREEN_WID;
   this.hi_y = this.SCREEN_HEI;
 
-  this.scroll_lines = [ 0, this.SCREEN_HEI - 1 ];
+  this._scroll_lines = { 'min': -1, 'max': -1 };
 
   this.screen = new Array(this.hi_x * this.hi_y);
 
@@ -199,22 +199,30 @@ function naoterm(params)
         debugwrite("<B>UNHANDLED " + str + "</B>");
     }
 
+    this.scroll_lines = function(top, btm)
+    {
+        var a = (this._scroll_lines.min == -1) ? 0 : this._scroll_lines.min;
+        var b = (this._scroll_lines.max == -1) ? this.SCREEN_HEI - 1 : this._scroll_lines.max;
+        if (top != undefined && btm != undefined)
+            this._scroll_lines = { 'min': top, 'max': btm };
+        return {'min':a, 'max':b};
+    }
+
     this.scroll_screen_down = function(numlines)
     {
-        var a = this.scroll_lines[0];
-        var b = this.scroll_lines[1];
+        var l = this.scroll_lines();
 
         debugwrite("scroll_screen_down("+numlines+")");
         while (numlines > 0) {
             numlines--;
-            for (var y = b - 1; y >= a; y--) {
+            for (var y = l.max - 1; y >= l.min; y--) {
                 for (var x = 0; x < this.SCREEN_WID; x++) {
                     var tmp = this.get_data(x, y);
                     this.set_data(x, y+1, tmp);
                 }
             }
             for (var x = 0; x < this.SCREEN_WID; x++) {
-                this.clrcell(x, a);
+                this.clrcell(x, l.min);
             }
         }
     }
@@ -226,20 +234,19 @@ function naoterm(params)
             return;
         }
 
-        var a = this.scroll_lines[0];
-        var b = this.scroll_lines[1];
+        var l = this.scroll_lines();
 
         debugwrite("scroll_screen("+numlines+")");
         while (numlines > 0) {
             numlines--;
-            for (var y = a + 1; y <= b; y++) {
+            for (var y = l.min + 1; y <= l.max; y++) {
                 for (var x = 0; x < this.SCREEN_WID; x++) {
                     var tmp = this.get_data(x, y);
                     this.set_data(x, y-1, tmp);
                 }
             }
             for (var x = 0; x < this.SCREEN_WID; x++) {
-                this.clrcell(x, b);
+                this.clrcell(x, l.max);
             }
         }
     }
@@ -429,9 +436,7 @@ function naoterm(params)
         for (var i = 0; i < fields.length; i++) {
             ret[fields[i]] = this[fields[i]];
         }
-        ret.scroll_lines = [];
-        ret.scroll_lines[0] = this.scroll_lines[0];
-        ret.scroll_lines[1] = this.scroll_lines[1];
+        ret._scroll_lines = this.scroll_lines();
 
         ret.screen = new Array(this.hi_x * this.hi_y);
         for (var i = 0; i < this.screen.length; i++) {
@@ -452,8 +457,7 @@ function naoterm(params)
         for (var i = 0; i < fields.length; i++) {
             this[fields[i]] = data[fields[i]];
         }
-        this.scroll_lines[0] = data.scroll_lines[0];
-        this.scroll_lines[1] = data.scroll_lines[1];
+        this.scroll_lines(data._scroll_lines.min, data._scroll_lines.max);
 
         this.screen = new Array(data.hi_x * data.hi_y);
         for (var i = 0; i < data.screen.length; i++) {
@@ -574,7 +578,8 @@ function naoterm(params)
 	  if (this.cursor_y < 0) this.cursor_y = 0;
           if (nodebug == undefined)
 	      debugwrite("movecursorpos("+x+","+y+")");
-        if (y == 1 && this.cursor_y > this.scroll_lines[1]) {
+        var l = this.scroll_lines();
+        if (y == 1 && this.cursor_y > l.max) {
             this.scroll_screen(1);
             this.cursor_y--;
         }
@@ -1093,7 +1098,7 @@ function naoterm(params)
                   lines[0]--;
                   lines[1]--;
               }
-              this.scroll_lines = lines;
+              this.scroll_lines(lines[0], lines[1]);
               debugwrite("set scroll lines: ("+lines[0]+","+lines[1]+")");
               break;
 	  case 'u': /* restore cursor pos */
