@@ -58,17 +58,6 @@ function toggle_debug()
 function is_array(input){
     return typeof(input)=='object'&&(input instanceof Array);
 }
-/*
-String.prototype.trim = function() {
-    return this.replace(/^\s+|\s+$/g,"");
-}
-String.prototype.ltrim = function() {
-    return this.replace(/^\s+/,"");
-}
-String.prototype.rtrim = function() {
-    return this.replace(/\s+$/,"");
-}
-*/
 
 
 /*
@@ -159,39 +148,35 @@ function naoterm(params)
     };
 
   /* missing some chars */
-    this.deccharset = {'`':'{', 'a':'&#x2592;', 'j':'-', 'k':'-', 'l':'-', 'm':'-', 'n':'-', 'q':'-', 't':'|', 'u':'|', 'v':'-', 'w':'-', 'x':'|', '~':'.'};
+    this.deccharset = {'`':'{', 'a':'&#x2592;', 'j':'-', 'k':'-', 'l':'-', 'm':'-', 'n':'-', 'q':'-', 't':'|', 'u':'|', 'v':'-', 'w':'-', 'x':'|', '~':'&#x00b7;'};
 
+  /* see https://www.rfc-editor.org/rfc/rfc1345.html (CP437) */
   this.ibmcharset = {
-      '176':'&#x2591;',
-      '177':'&#x2592;',
-      '179':'&#x2502;',
+      '176':'&#x2591;', /* unlit corridor */
+      '177':'&#x2592;', /* lit corridor */
+      '179':'&#x2502;', /* wall (vertical) */
       '180':'&#x2524;',
-      '191':'&#x2510;',
-      '192':'&#x2514;',
+      '191':'&#x2510;', /* top right corner */
+      '192':'&#x2514;', /* bottom left corner */
       '193':'&#x2534;',
       '194':'&#x252c;',
       '195':'&#x251c;',
-      '196':'&#x2500;',
-      '197':'&#x253c;',
-      '217':'&#x2518;',
-      '218':'&#x250c;',
-      '250':'&#x00b7;',
-      '254':'&#x002d;'
+      '196':'&#x2500;', /* wall (horizontal) */
+      '197':'&#x253c;', /* cross section */
+      '217':'&#x2518;', /* bottom right corner */
+      '218':'&#x250c;', /* top left corner */
+      '250':'&#x00b7;', /* floor (middle dot) */
+      '254':'&#x002d;'  /* open door symbol (hyphen) */
 };
-  /*
-  this.ibmcharset = new Array({176+'':'#', 179+'':'|', 180+'':'|', 191+'':'-', 192+'':'-', 193+'':'-', 194+'':'-', 195+'':'|'},
-		  {196+'':'-', 197+'':'-', 217+'':'-', 218+'':'-'},{247+'':'{', 250+'':'.', 254+'':'.'},
 
-		  {200+'':'-', 201+'':'-'},{205+'':'-', 206+'':'.', 187+'':'-', 188+'':'-', 177+'':'#', 186+'':'|'});
-  */
-    /* decgraphics */
-  this.alt_charset2 = {'q' : "&#x2500;",
-		       'l' : "&#x250c;",
-		       'x' : "&#x2502;",
-		       'm' : "&#x2514;",
-		       'j' : "&#x2518;",
-		       'k' : "&#x2510;",
-		       '~' : ".",
+  /* decgraphics */
+  this.alt_charset2 = {'q' : '&#x2500;',
+		       'l' : '&#x250c;',
+		       'x' : '&#x2502;',
+		       'm' : '&#x2514;',
+		       'j' : '&#x2518;',
+		       'k' : '&#x2510;',
+		       '~' : '&#x00b7;',
 		       'a' : '&#x2592;',
 
 		       'o' : '&#x2500;',
@@ -583,13 +568,6 @@ function naoterm(params)
 
     this.movecursorpos = function(x,y, nodebug)
     {
-        /*
-          if ((this.cursor_x + x) >= this.SCREEN_WID || (this.cursor_y + y) >= this.SCREEN_HEI) {
-              debugwrite("movecursorpos: Out of screen");
-	      this.resize(Math.max(this.SCREEN_WID, this.cursor_x+x+1),
-			  Math.max(this.SCREEN_HEI, this.cursor_y+y+1));
-                          }
-                          */
 	  this.cursor_x += x;
 	  if (this.cursor_x < 0) this.cursor_x = 0;
 	  this.cursor_y += y;
@@ -600,7 +578,7 @@ function naoterm(params)
             this.scroll_screen(1);
             this.cursor_y--;
         }
-      }
+    }
 
   this.setattr = function(attr)
       {
@@ -744,11 +722,6 @@ function naoterm(params)
                   if (atr & 64) style += ' it'; /* italic */
                   if (atr & 128) style += ' st'; /* strikethrough */
 	      }
-	      /*
-	      if (reverse) {
-		  var tmp = bg; bg = fg; fg = tmp;
-	      }
-	      */
 	      if (bg != undefined && bg != this.def_bgcolor)
 		  style += ' b'+bg;
 	      if (fg != undefined && (fg + bright*8) != this.def_color)

@@ -54,10 +54,10 @@ function create_ui()
     btn.innerHTML += '<span id="speed_slider"></span>';
     btn.innerHTML += '</div>';
     btn.innerHTML += '<div id="trd_ui_info">';
-    btn.innerHTML += '<span> <b>Size:</b><span id="termsize_display"></span></span>';
-    btn.innerHTML += '<span> <b>Time:</b><span id="frame_time_display"></span></span>';
-    btn.innerHTML += '<span> <b>Played:</b><span id="frame_playtime_display"></span></span>';
-    btn.innerHTML += '<span> <b>Delay:</b><span id="frame_delay_display"></span></span>';
+    btn.innerHTML += '<span> <b>Size: </b><span id="termsize_display"></span></span>';
+    btn.innerHTML += '<span> <b>Time: </b><span id="frame_time_display"></span></span>';
+    btn.innerHTML += '<span> <b>Played: </b><span id="frame_playtime_display"></span></span>';
+    btn.innerHTML += '<span> <b>Delay: </b><span id="frame_delay_display"></span></span>';
     btn.innerHTML += '</div>';
     btn.innerHTML += '</div>';
     btn.innerHTML += '<div id="tty_loader_div"></div>';
@@ -66,7 +66,7 @@ function create_ui()
 
     btn = $("speed_slider");
     if (btn) {
-        btn.innerHTML = "<span id='speed_slider'>Speed:<input id='speed_slider_input' type='range' min='"+SPEED.min+"' max='"+SPEED.max+"' value='"+SPEED.current+"' step='"+SPEED.step+"'></input><span id='speed_display'></span></span>";
+        btn.innerHTML = "<span id='speed_slider'>Speed: <input id='speed_slider_input' type='range' min='"+SPEED.min+"' max='"+SPEED.max+"' value='"+SPEED.current+"' step='"+SPEED.step+"'></input><span id='speed_display'></span></span>";
     }
 
     btn = $("btn_first");
