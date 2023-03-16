@@ -1155,12 +1155,12 @@ function naoterm(params)
 
   this.writestr = function(datastr)
       {
-          if (this.paused)
-              return;
           this.input = this.input.concat(datastr.split(""));
           this.failed_input = 0;
 	  this.had_clrscr = 0;
 	  var wrotestr = '';
+          if (this.paused)
+              return;
 	  while (!this.failed_input) {
               var inp = this.get_input();
               if (inp == '') {

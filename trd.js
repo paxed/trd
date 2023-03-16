@@ -302,6 +302,16 @@ function set_speed(val)
 	btn.innerHTML = SPEED.current.toString();
 }
 
+playback_timer_count = 0;
+function playback_timer()
+{
+    if (playback_timer_count == 1 && !paused) {
+        play_next_frame();
+        playback_ttyrec();
+    }
+    playback_timer_count--;
+}
+
 function playback_ttyrec()
 {
     if (paused)
@@ -311,8 +321,6 @@ function playback_ttyrec()
         load_random_ttyrec();
         return;
     }
-
-    play_next_frame();
 
     if (ttyrec_frames[current_frame] == undefined)
         return;
@@ -327,7 +335,8 @@ function playback_ttyrec()
     if (delay > MAX_PAUSE)
         delay = MAX_PAUSE;
 
-    setTimeout(playback_ttyrec, delay);
+    playback_timer_count++;
+        setTimeout(playback_timer, delay);
 }
 
 var toggle_show_screen_html = 0;
