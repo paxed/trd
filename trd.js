@@ -1,6 +1,6 @@
 
 var NAOTERM_URL = "";
-var DEBUG_INFO = 0;
+var DEBUG_INFO = 0; /* 0: off, 1: on, clear every frame, 2: on, concatenate */
 var SPEED = { min: 20, current: 500, max: 1000, step: 20 };
 var MAX_PAUSE = 1500;
 var PAUSE_INITIAL = 0;
@@ -116,7 +116,7 @@ function show_current_frame()
     if (frame == undefined)
         return;
 
-    debugwrite("<hr>", 1);
+    debugwrite("<hr>", (DEBUG_INFO == 1) ? 1 : 0);
     debugwrite("Frame #"+current_frame+": pos:"+frame.pos+",time:"+frame.time+"(delay:"+frame.delay+"),pagelen:"+frame.pagelen);
 
     if (naoterminal == undefined) {
