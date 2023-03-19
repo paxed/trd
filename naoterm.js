@@ -133,7 +133,7 @@ function naoterm(params)
     this.fail_input = function(str)
     {
         this.failed_input = 1;
-        this.unhandled("FAILED INPUT: '"+str+"'");
+        debugwrite("Input split between two frames");
         if (str != undefined) {
             var tmp = str.split("");
             this.input = tmp.concat(this.input);
@@ -479,16 +479,16 @@ function naoterm(params)
 	  var tmppanel = this.clone();
 	  var x,y;
 
-	  this.SCREEN_WID = wid;
-	  this.SCREEN_HEI = hei;
+	  this.SCREEN_WID = wid + 20;
+	  this.SCREEN_HEI = hei + 2;
           this.hi_x = wid;
           this.hi_y = hei;
 
 	  delete this.screen;
 	  this.screen = new Array(wid * hei);
 
-	  for (y = 0; y < Math.max(this.SCREEN_HEI, tmppanel.SCREEN_HEI); y++) {
-	      for (x = 0; x < Math.max(this.SCREEN_WID, tmppanel.SCREEN_WID); x++) {
+	  for (y = 0; y < Math.min(this.SCREEN_HEI, tmppanel.SCREEN_HEI); y++) {
+	      for (x = 0; x < Math.min(this.SCREEN_WID, tmppanel.SCREEN_WID); x++) {
 		  var dat = tmppanel.get_data(x,y);
 		  if (dat != undefined) this.set_data(x,y, Object.assign({}, dat));
 	      }
