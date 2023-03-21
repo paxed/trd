@@ -27,9 +27,15 @@ button.selected {
     display: block;
 }
 
+@keyframes blinker {
+  50% {
+    color: rgba(0, 0, 0, 0);
+  }
+}
+
 .ttyscreen .cur { text-decoration: underline; }
 .ttyscreen .ul { text-decoration: underline; }
-.ttyscreen .bl { text-decoration: blink; }
+.ttyscreen .bl { animation: blinker 1.2s step-start infinite; }
 .ttyscreen .it { font-style: italic; }
 .ttyscreen .st { text-decoration: line-through; }
 .ttyscreen .f0 { color: #000000; }
