@@ -78,6 +78,7 @@ function naoterm(params)
   this.hidden_cursor = 0;
 
   this.XTWINOPS_resize = 0;
+  this.OSC_color_change = 1;
 
   this.cursor_x = 0;
   this.cursor_y = 0;
@@ -969,6 +970,42 @@ function naoterm(params)
 	return this.ucs2encode(codePoints);
     }
 
+    this.change_color = function(coloridx, colordef)
+    {
+        if (!this.OSC_color_change)
+            return;
+        if (coloridx < 0 || coloridx > 15) {
+            this.unhandled("change_color with coloridx="+coloridx);
+            return;
+        }
+        debugwrite("change_color("+coloridx+","+colordef+")");
+        const ruleList = document.styleSheets[0].cssRules;
+        var ruleidx = 0;
+        for (const rule of ruleList) {
+            if (rule.cssText.match(/^:root/)) {
+                var reg = new RegExp("--color"+coloridx+": [^;]+;");
+                var str = rule.cssText;
+                str = str.replace(reg, "--color"+coloridx+": "+colordef+";");
+                document.styleSheets[0].deleteRule(ruleidx);
+                document.styleSheets[0].insertRule(str, ruleidx);
+                return;
+            }
+            ruleidx++;
+        }
+    }
+
+    this.handle_OSC = function(param)
+    {
+        debugwrite("handle_OSC("+param.toDebugString()+")");
+        var params = param.split(";");
+        if (parseInt(params[0]) == 4) { /* change color */
+            var coloridx = parseInt(params[1]);
+            var colordef = params[2];
+            this.change_color(coloridx, colordef);
+        } else {
+            this.unhandled("OSC CODE "+param.toDebugString());
+        }
+    }
 
   this.doescapecode = function(code, param)
       {
@@ -1197,7 +1234,7 @@ function naoterm(params)
                               param += c1;
                           }
                       } while (!this.failed_input);
-                      this.unhandled("OSC '" + param+ "'");
+                      this.handle_OSC(param);
                       /* TODO: handle 10;xx (set default fg color) */
                       /* TODO: handle 11;xx (set default bg color) */
                       break;

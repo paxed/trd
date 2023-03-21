@@ -7,11 +7,14 @@ var PAUSE_INITIAL = 0;
 var CACHEFRAMES = { n_previous: 10, every_nth: 50, max: 500 };
 var PAUSE_UNHANDLED = 0; /* pause playback when encountering unhandled escape code? */
 var XTWINOPS_resize = 0; /* 1: allow term resize via escape code, 0: resize when necessary */
+var OSC_color_change = 0; /* 1: allow changing term colors with esc codes */
 var ENABLE_RND_TTYREC = 1; /* 1: get "random" ttyrec via rndttyrec.php */
 
 /* ******************* */
 
-var naoterm_params = { 'pause_on_unhandled': PAUSE_UNHANDLED, 'XTWINOPS_resize': XTWINOPS_resize };
+var naoterm_params = { 'pause_on_unhandled': PAUSE_UNHANDLED,
+                       'XTWINOPS_resize': XTWINOPS_resize,
+                       'OSC_color_change': OSC_color_change };
 var naoterminal = new naoterm(naoterm_params);
 var current_ttyrec = -1;
 var paused = PAUSE_INITIAL;
