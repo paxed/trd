@@ -543,8 +543,11 @@ function naoterm(params)
 	  } else if (o == 8) {
               debugwrite("putchar(BACKSPACE)");
 	      if (this.cursor_x > 0) this.movecursorpos(-1, 0);
+          } else if (o == 7) {
+              debugwrite("putchar(BELL)");
+              /* ignore */
 	  } else {
-              this.unhandled("putchar("+chr+")");
+              this.unhandled("putchar("+o+")");
           }
 
 	  if (this.hi_x <= this.cursor_x) this.hi_x = this.cursor_x+1;
