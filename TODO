@@ -12,3 +12,5 @@
 - allow toggling pause_on_unhandled and XTWINOPS_resize
 
 - remember debug/pause/etc states (cookies?)
+
+- search for a string; pause playback when it appears in terminal

@@ -629,7 +629,14 @@ function naoterm(params)
               else if (a == 38) {
                   /* Set fg color: CSI 38 ; 5 ; <color_index> m */
                   if (tmpidx+2 < attr.length && attr[tmpidx+1] == 5) {
-                      this.color = parseInt(attr[tmpidx+2]);
+                      var clr = parseInt(attr[tmpidx+2]);
+                      if (clr >= 0 && clr <= 16) {
+                          this.color = clr % 8;
+                          if (clr >= 8)
+                              this.attr |= 1;
+                      } else {
+                          debugwrite("<b>Trying to set color to "+clr+"</b>");
+                      }
                       break;
                   } else {
                       unhandled = 1;
@@ -640,7 +647,14 @@ function naoterm(params)
               else if (a == 48) {
                   /* Set bg color: CSI 48 ; 5 ; <color_index> m */
                   if (tmpidx+2 < attr.length && attr[tmpidx+1] == 5) {
-                      this.bgcolor = parseInt(attr[tmpidx+2]);
+                      var clr = parseInt(attr[tmpidx+2]);
+                      if (clr >= 0 && clr <= 16) {
+                          this.bgcolor = clr % 8;
+                          if (clr >= 8)
+                              this.attr |= 1;
+                      } else {
+                          debugwrite("<b>Trying to set bgcolor to "+clr+"</b>");
+                      }
                       break;
                   } else {
                       unhandled = 1;
