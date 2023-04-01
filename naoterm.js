@@ -1215,6 +1215,9 @@ function naoterm(params)
 		  default:
 		      this.unhandled('ESCAPE CODE: '+esccode);
 		      break;
+                  case 'M':
+                      this.scroll_screen(-1);
+                      break;
                   case '%':
                       var c1 = this.get_input();
                       if (c1 == "") {
