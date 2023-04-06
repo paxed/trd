@@ -24,25 +24,16 @@ function show_debug_info()
 function debugobj(obj)
 {
     if (!show_debugging_info) return;
-    var output = '<b>';
+    var output = '';
     for (property in obj) {
 	output += property + ': ' + obj[property]+'; ';
     }
-    output += '</b>';
-    debugwrite(output);
+    output = output.replaceAll('<','&lt;').replaceAll('&','&amp;');;
+    debugwrite('<b>' + output + '</b>');
 }
 
 String.prototype.toDebugString = function() {
-    return this;
-    var s = this+" [";
-    for (var i = 0; i < this.length; i++) {
-	var c = this.charAt(i);
-	var cc = this.charCodeAt(i);
-	s += "{'"+c+"', "+cc+"}";
-	if (i+1 < this.length) s+= ", ";
-    }
-    s+= "]";
-    return s;
+    return this.replaceAll('<','&lt;').replaceAll('&','&amp;');;
 }
 
 function toggle_debug()
