@@ -79,6 +79,8 @@ function naoterm(params)
 
   this.XTWINOPS_resize = 0;
   this.OSC_color_change = 1;
+  this.colordefs_init = 0;
+  this.colordefs = { };
 
   this.cursor_x = 0;
   this.cursor_y = 0;
@@ -120,6 +122,35 @@ function naoterm(params)
             this[i] = params[i];
         } else {
             debugwrite("<b>ERROR: unknown naoterm param '"+i+"'</B>");
+        }
+    }
+
+    /* get colors and their definitions from the css */
+    this.get_css_colordefs = function()
+    {
+        if (this.colordefs_init)
+            return;
+        const ruleList = document.styleSheets[0].cssRules;
+
+        for (const rule of ruleList) {
+            if (rule.cssText.match(/^:root/)) {
+                var reg = new RegExp("--color([0-9]+): *([^;]+);");
+                var str = rule.cssText;
+                var repeat = 1;
+                do {
+                    var found = str.match(reg);
+                    if (found != undefined && found[0] != undefined) {
+                        this.colordefs[found[1]] = found[2];
+                        debugwrite("SET colordef["+found[1]+"]="+found[2]);
+                        str = str.replace(reg, "");
+                        repeat = 1;
+                    } else {
+                        repeat = 0;
+                    }
+                } while (repeat);
+                this.colordefs_init = 1;
+                return;
+            }
         }
     }
 
@@ -630,7 +661,8 @@ function naoterm(params)
                   /* Set fg color: CSI 38 ; 5 ; <color_index> m */
                   if (tmpidx+2 < attr.length && attr[tmpidx+1] == 5) {
                       var clr = parseInt(attr[tmpidx+2]);
-                      if (clr >= 0 && clr <= 16) {
+                      this.get_css_colordefs();
+                      if (this.colordefs[clr] || (clr >= 0 && clr <= 16)) {
                           this.color = clr % 8;
                           if (clr >= 8)
                               this.attr |= 1;
@@ -648,7 +680,8 @@ function naoterm(params)
                   /* Set bg color: CSI 48 ; 5 ; <color_index> m */
                   if (tmpidx+2 < attr.length && attr[tmpidx+1] == 5) {
                       var clr = parseInt(attr[tmpidx+2]);
-                      if (clr >= 0 && clr <= 16) {
+                      this.get_css_colordefs();
+                      if (this.colordefs[clr] || (clr >= 0 && clr <= 16)) {
                           this.bgcolor = clr % 8;
                           if (clr >= 8)
                               this.attr |= 1;
@@ -987,14 +1020,31 @@ function naoterm(params)
 	return this.ucs2encode(codePoints);
     }
 
+    /* normalize color definition string to #ffffff */
+    this.normalize_colordef = function(colorstr)
+    {
+        colorstr = colorstr.trim();
+        colorstr = colorstr.replace(/^rgb:/, "");
+        colorstr = colorstr.replace(/\//g, "");
+        if (!colorstr.match(/^[0-9a-fA-F]+$/)) {
+            this.unhandled("normalize_colordef '"+colorstr+"'");
+        }
+        return "#"+colorstr;
+    }
+
     this.change_color = function(coloridx, colordef)
     {
+        colordef = this.normalize_colordef(colordef);
+        this.get_css_colordefs();
+        this.colordefs[coloridx] = colordef;
+
         if (!this.OSC_color_change)
             return;
-        if (coloridx < 0 || coloridx > 15) {
+        if (coloridx < 0) {
             this.unhandled("change_color with coloridx="+coloridx);
             return;
         }
+
         debugwrite("change_color("+coloridx+","+colordef+")");
         const ruleList = document.styleSheets[0].cssRules;
         var ruleidx = 0;
@@ -1002,7 +1052,13 @@ function naoterm(params)
             if (rule.cssText.match(/^:root/)) {
                 var reg = new RegExp("--color"+coloridx+": [^;]+;");
                 var str = rule.cssText;
-                str = str.replace(reg, "--color"+coloridx+": "+colordef+";");
+                var def = "--color"+coloridx+": "+colordef+";";
+                if (str.match(reg)) {
+                    str = str.replace(reg, def);
+                } else {
+                    /* add a new color definition to the css */
+                    str = str.replace(/} *$/, def + " }");
+                }
                 document.styleSheets[0].deleteRule(ruleidx);
                 document.styleSheets[0].insertRule(str, ruleidx);
                 return;
@@ -1310,7 +1366,6 @@ function naoterm(params)
           if (this.input.length > 0)
               this.unhandled("INPUT: '"+this.input.join("")+"'");
       }
-
 
 }
 

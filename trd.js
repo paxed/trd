@@ -7,7 +7,7 @@ var PAUSE_INITIAL = 0;
 var CACHEFRAMES = { n_previous: 10, every_nth: 50, max: 500 };
 var PAUSE_UNHANDLED = 0; /* pause playback when encountering unhandled escape code? */
 var XTWINOPS_resize = 0; /* 1: allow term resize via escape code, 0: resize when necessary */
-var OSC_color_change = 0; /* 1: allow changing term colors with esc codes */
+var OSC_color_change = 1; /* 1: allow changing term colors with esc codes */
 var ENABLE_RND_TTYREC = 1; /* 1: get "random" ttyrec via rndttyrec.php */
 
 /* ******************* */
