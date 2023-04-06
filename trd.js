@@ -220,7 +220,6 @@ function show_next_frame()
 {
     toggle_pause_playback(1);
     if (current_frame < ttyrec_frames.length - 1) {
-        show_current_frame();
         update_cached_frames();
         current_frame++;
         show_current_frame();
@@ -231,7 +230,6 @@ function show_prev_frame()
 {
     toggle_pause_playback(1);
     if (current_frame > 0) {
-        show_current_frame();
         update_cached_frames();
         current_frame = find_prev_cached();
         show_current_frame();
