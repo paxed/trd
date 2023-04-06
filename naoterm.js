@@ -1027,6 +1027,7 @@ function naoterm(params)
         colorstr = colorstr.trim();
         colorstr = colorstr.replace(/^rgb:/, "");
         colorstr = colorstr.replace(/\//g, "");
+        colorstr = colorstr.replace(/^#/g, "");
         if (!colorstr.match(/^[0-9a-fA-F]+$/)) {
             this.unhandled("normalize_colordef '"+colorstr+"'");
         }
