@@ -45,7 +45,6 @@ function create_ui()
     btn.innerHTML += '<span id="btn_first"></span>';
     btn.innerHTML += '<span id="btn_prev"></span>';
     btn.innerHTML += '<span id="btn_pause"></span>';
-    btn.innerHTML += '<span id="frame_display"></span>';
     btn.innerHTML += '<span id="btn_next"></span>';
     btn.innerHTML += '<span id="btn_last"></span>';
     if (ENABLE_RND_TTYREC) {
@@ -59,6 +58,7 @@ function create_ui()
     btn.innerHTML += '<span id="speed_slider"></span>';
     btn.innerHTML += '</div>';
     btn.innerHTML += '<div id="trd_ui_info">';
+    btn.innerHTML += '<span><b>Frame: </b><span id="frame_display"></span></span>';
     btn.innerHTML += '<span> <b>Size: </b><span id="termsize_display"></span></span>';
     btn.innerHTML += '<span> <b>Time: </b><span id="frame_time_display"></span></span>';
     btn.innerHTML += '<span> <b>Played: </b><span id="frame_playtime_display"></span></span>';
