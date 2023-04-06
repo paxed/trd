@@ -9,6 +9,7 @@ var PAUSE_UNHANDLED = 0; /* pause playback when encountering unhandled escape co
 var XTWINOPS_resize = 0; /* 1: allow term resize via escape code, 0: resize when necessary */
 var OSC_color_change = 1; /* 1: allow changing term colors with esc codes */
 var ENABLE_RND_TTYREC = 1; /* 1: get "random" ttyrec via rndttyrec.php */
+var ENABLE_SCREEN_CACHE = 1;
 
 /* ******************* */
 
@@ -46,6 +47,7 @@ function create_ui()
     btn.innerHTML += '<span id="btn_pause"></span>';
     btn.innerHTML += '<span id="frame_display"></span>';
     btn.innerHTML += '<span id="btn_next"></span>';
+    btn.innerHTML += '<span id="btn_last"></span>';
     if (ENABLE_RND_TTYREC) {
         btn.innerHTML += '<span class="divider"> | </span>';
         btn.innerHTML += '<span id="btn_rnd_ttyrec"></span>';
@@ -85,6 +87,11 @@ function create_ui()
     btn = $("btn_next");
     if (btn) {
         btn.innerHTML = '<button type="button" onclick="show_next_frame();">&gt;</button>';
+    }
+
+    btn = $("btn_last"); /* or as close as we can get ... */
+    if (btn) {
+        btn.innerHTML = '<button type="button" onclick="goto_last_frame();">&#x23ed;</button>';
     }
 
     btn = $("btn_pause");
@@ -130,10 +137,12 @@ function show_current_frame()
         debugwrite("[screen from cache]");
     } else {
         naoterminal.writestr(frame.data);
-        ttyrec_frames[current_frame].term = naoterminal.copy();
-        if (last_cached_frame < current_frame)
-            last_cached_frame = current_frame;
-        n_cached_frames++;
+        if (ENABLE_SCREEN_CACHE) {
+            ttyrec_frames[current_frame].term = naoterminal.copy();
+            if (last_cached_frame < current_frame)
+                last_cached_frame = current_frame;
+            n_cached_frames++;
+        }
     }
     $("tty_loader_div").innerHTML = naoterminal.get_html();
 
@@ -195,11 +204,13 @@ function update_cached_frames()
     }
 }
 
+/* find frame before current one which is cached or has a clrscr */
 function find_prev_cached()
 {
     var ret = current_frame;
     while (ret-- > 0) {
-        if (ttyrec_frames[ret].term != undefined)
+        if (ttyrec_frames[ret].term != undefined
+            || ttyrec_frames[ret].clrscr)
             break;
     }
     return ret;
@@ -247,6 +258,21 @@ function goto_first_frame()
 {
     toggle_pause_playback(1);
     current_frame = 0;
+    if (naoterminal) {
+        delete naoterminal;
+        naoterminal = undefined;
+    }
+    show_current_frame();
+}
+
+function goto_last_frame()
+{
+    toggle_pause_playback(1);
+    current_frame = ttyrec_frames.length - 1;
+    while (!ttyrec_frames[current_frame].clrscr
+           && current_frame > 0) {
+        current_frame--;
+    }
     if (naoterminal) {
         delete naoterminal;
         naoterminal = undefined;
@@ -448,6 +474,11 @@ function parse_ttyrec(data)
     var pos = 0;
     var datalen = data.length;
     var framenum = 0;
+    /* generally clear screen is done one of two ways:
+       1) "ESC [ 2 J"  (a full screen clear)
+       2) "ESC [ H" followed by "ESC [ J" (move cursor to 0,0, clear screen down from cursor)
+       this regex matches either of those: */
+    var re_clrscr = /(\033\[2J|\033\[H\033\[J)/;
 
     while (pos < datalen) {
         var framepos = pos;
@@ -457,8 +488,10 @@ function parse_ttyrec(data)
         var frame = data.slice(pos, pos + pagelen); pos += pagelen;
 
         var delay = calc_frame_delay(time);
+        var clrscr = re_clrscr.test(frame);
 
-        frames.push({ "pos": framepos, "time": time, "delay":delay, "pagelen": pagelen, "data": frame });
+        frames.push({ "pos": framepos, "time": time, "delay":delay, "pagelen": pagelen,
+                      "data": frame, "clrscr": clrscr });
         framenum++;
     }
     return frames;

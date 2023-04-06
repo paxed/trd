@@ -851,6 +851,7 @@ function naoterm(params)
 	  case 1000: break;
           case 1034: break; /* Don't interpret "meta" key */
 	  case 1047: break; /* TODO: switch to alternate screen & clear it. should handle this? */
+          case 1048: break; /* TODO: DECSC: save cursor/attr info */
           case 1049: break; /* use normal screen buffer & restore cursor (like DECRC) */
 	  case 1051: break; /* ignore. SUN function keys */
 	  case 1052: break; /* ignore. HP function keys */
