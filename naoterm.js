@@ -1193,7 +1193,15 @@ function naoterm(params)
 	  case 'm': /* set color and attr */
 		  var attr = param.split(";");
 		  this.setattr(attr);
-		  break;
+	          break;
+          case 'n': /* DSR: Device status report */
+              if (param == '5' || param == '6') {
+                  /* the response is not output to the terminal,
+                     so all we can do is ignore these */
+              } else {
+                  this.unhandled("CSI DSR "+param);
+              }
+              break;
 	  case 's': /* save cursor pos */
 		  this.savecursor();
 	      break;
