@@ -14,3 +14,5 @@
 - remember debug/pause/etc states (cookies?)
 
 - search for a string; pause playback when it appears in terminal
+
+- support ansi art files (.ans)
