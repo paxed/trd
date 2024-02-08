@@ -102,6 +102,7 @@ function naoterm(params)
   this.use_alt_charset = 0;
   this.had_clrscr = 0;
   this.utf8 = 0;
+  this.last_printed_char = '';
 
 
     for (var i in params) {
@@ -1239,6 +1240,13 @@ function naoterm(params)
                   this.resize(parseInt(lines[2]), parseInt(lines[1]));
               }
               break;
+          case 'b': /* REP - repeat the last printed char n times */
+              if (this.last_printed_char != '') {
+                  var amount = parseInt(param);
+                  if (isNaN(amount) || amount < 1) amount = 1;
+                  this.putstr(this.last_printed_char.repeat(amount));
+              }
+              break;
 	  case 'z': /* NAO specific, vt_tiledata option */
 	      debugwrite("TODO: <b>vt_tiledata:</b> " + param);
 	      break;
@@ -1359,6 +1367,7 @@ function naoterm(params)
 		  }
 	      } else {
 		  wrotestr += inp;
+		  this.last_printed_char = inp;
 	      }
 	  }
 	  if (wrotestr.length > 0) {
