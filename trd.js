@@ -54,6 +54,7 @@ function create_ui()
     btn.innerHTML += '<span class="divider"> | </span>';
     btn.innerHTML += '<span id="btn_debug"></span>';
     btn.innerHTML += '<span id="btn_screendata"></span>';
+    btn.innerHTML += '<span id="btn_download"></span>';
     btn.innerHTML += '<span class="divider"> | </span>';
     btn.innerHTML += '<span id="speed_slider"></span>';
     btn.innerHTML += '</div>';
@@ -68,6 +69,7 @@ function create_ui()
     btn.innerHTML += '<div id="tty_loader_div"></div>';
     btn.innerHTML += '<div id="ttyscreen_html_div"></div>';
     btn.innerHTML += '<div id="debugdiv"></div>';
+    btn.innerHTML += '<img id="trd_screenshot_img">';
 
     btn = $("speed_slider");
     if (btn) {
@@ -108,6 +110,12 @@ function create_ui()
     if (btn) {
         btn.innerHTML = '<button type="button" onclick="show_screen_html();" id="screendata_button">screen data</button>';
     }
+
+    btn = $("btn_download");
+    if (btn) {
+        btn.innerHTML = '<button type="button" onclick="download_screen_png();" id="download_png_button">download png</button>';
+    }
+
 
     btn = $("btn_rnd_ttyrec");
     if (btn) {
@@ -364,6 +372,59 @@ function playback_ttyrec()
 
     playback_timer_count++;
         setTimeout(playback_timer, delay);
+}
+
+function getCSStext()
+{
+    var s = '';
+    const ruleList = document.styleSheets[0].cssRules;
+
+    for (const rule of ruleList) {
+        s = s + "\n" + rule.cssText;
+    }
+
+    return s;
+}
+
+function renderDomToImg(img,dom)
+{
+    var size = img.getBoundingClientRect();
+    const svg = '<svg xmlns="http://www.w3.org/2000/svg" width="'+size.width+'" height="'+size.height+'"><style>'+getCSStext()+'</style><foreignObject width="100%" height="100%"><div xmlns="http://www.w3.org/1999/xhtml">'+dom.innerHTML+'</div></foreignObject></svg>';
+
+    const svgBlob = new Blob( [svg], { type: 'image/svg+xml;charset=utf-8' } );
+    const svgObjectUrl = URL.createObjectURL( svgBlob );
+
+    const oldSrc = img.src;
+    if( oldSrc && oldSrc.startsWith( 'blob:' ) ) { // See https://stackoverflow.com/a/75848053/159145
+        URL.revokeObjectURL( oldSrc );
+    }
+
+    img.onload = function() {
+        var canvas = document.createElement('canvas');
+        canvas.width = size.width;
+        canvas.height = size.height;
+        var ctx = canvas.getContext("2d");
+        ctx.drawImage(img, 0,0);
+
+        var link = document.createElement('a');
+        link.download = 'trd-'+Date.now()+'.png';
+        link.href = canvas.toDataURL();
+        link.click();
+        img.style.display = 'none';
+    }
+
+    img.src = svgObjectUrl;
+}
+
+function download_screen_png()
+{
+    var img = $('trd_screenshot_img');
+    var screen = $('tty_loader_div');
+    var size = screen.firstChild.getBoundingClientRect();
+    img.style.display = 'block';
+    img.width = size.width;
+    img.height = size.height;
+    renderDomToImg(img, screen);
 }
 
 var toggle_show_screen_html = 0;

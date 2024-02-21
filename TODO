@@ -1,4 +1,5 @@
 
+- allow stopping just before screen clear
 
 - is it possible to get rid of the rawurlencode in getttyrec.php
   ... apparently with multipart/form-data?
