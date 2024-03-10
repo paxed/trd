@@ -679,8 +679,8 @@ function naoterm(params)
                           this.bgcolor = clr % 8;
                           if (clr >= 8)
                               this.attr |= 1;
-                          else
-                              this.attr &= ~1;
+                          //else
+                          //    this.attr &= ~1;
                       } else {
                           debugwrite("<b>Trying to set bgcolor to "+clr+"</b>");
                       }
