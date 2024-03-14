@@ -1020,14 +1020,23 @@ function naoterm(params)
     /* normalize color definition string to #ffffff */
     this.normalize_colordef = function(colorstr)
     {
+        /* rgb:(FFFF/FFFF/FFFF); each is 0-0xffff */
+        var rgbre = new RegExp("^rgb:([0-9a-fA-F]{4})\/([0-9a-fA-F]{4})\/([0-9a-fA-F]{4})");
+
         colorstr = colorstr.trim();
-        colorstr = colorstr.replace(/^rgb:/, "");
-        colorstr = colorstr.replace(/\//g, "");
-        colorstr = colorstr.replace(/^#/g, "");
-        if (!colorstr.match(/^[0-9a-fA-F]+$/)) {
-            this.unhandled("normalize_colordef '"+colorstr+"'");
+
+        if (rgbre.test(colorstr)) {
+            /* rgb:(FFFF/FFFF/FFFF); each is 0-0xffff; scale them down with 256 */
+            colorstr = colorstr.replace(rgbre, function(match, p1, p2, p3) { return "rgb("+parseInt(parseInt(p1,16)/256)+" "+parseInt(parseInt(p2,16)/256)+" "+parseInt(parseInt(p3,16)/256)+")" });
+        } else {
+            colorstr = colorstr.replace(/^rgb:/, "");
+            colorstr = colorstr.replace(/\//g, "");
+            colorstr = colorstr.replace(/^#/g, "");
+            if (!colorstr.match(/^[0-9a-fA-F]+$/)) {
+                this.unhandled("normalize_colordef '"+colorstr+"'");
+            }
         }
-        return "#"+colorstr;
+        return colorstr;
     }
 
     this.change_color = function(coloridx, colordef)
