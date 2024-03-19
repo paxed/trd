@@ -655,11 +655,15 @@ function naoterm(params)
                       var clr = parseInt(attr[tmpidx+2]);
                       this.get_css_colordefs();
                       if (this.colordefs[clr] || (clr >= 0 && clr <= 16)) {
-                          this.color = clr % 8;
-                          if (clr >= 8)
-                              this.attr |= 1;
-                          else
-                              this.attr &= ~1;
+                          if (!this.colordefs[clr]) {
+                              this.color = clr % 8;
+                              if (clr >= 8)
+                                  this.attr |= 1;
+                              else
+                                  this.attr &= ~1;
+                          } else {
+                              this.color = clr;
+                          }
                       } else {
                           debugwrite("<b>Trying to set color to "+clr+"</b>");
                       }
@@ -676,11 +680,15 @@ function naoterm(params)
                       var clr = parseInt(attr[tmpidx+2]);
                       this.get_css_colordefs();
                       if (this.colordefs[clr] || (clr >= 0 && clr <= 16)) {
-                          this.bgcolor = clr % 8;
-                          if (clr >= 8)
-                              this.attr |= 1;
-                          //else
-                          //    this.attr &= ~1;
+                          if (!this.colordefs[clr]) {
+                              this.bgcolor = clr % 8;
+                              if (clr >= 8)
+                                  this.attr |= 1;
+                              //else
+                              //    this.attr &= ~1;
+                          } else {
+                              this.bgcolor = clr;
+                          }
                       } else {
                           debugwrite("<b>Trying to set bgcolor to "+clr+"</b>");
                       }
@@ -1039,6 +1047,15 @@ function naoterm(params)
         return colorstr;
     }
 
+    this.add_ttyscreen_color_def = function(coloridx)
+    {
+        var fg = ".ttyscreen .f"+coloridx+" { color: var(--color"+coloridx+"); }";
+        var bg = ".ttyscreen .b"+coloridx+" { background-color: var(--color"+coloridx+"); }";
+        debugwrite("add css rule:<tt>"+fg+"</tt> and <tt>"+bg+"</tt>");
+        document.styleSheets[0].insertRule(fg);
+        document.styleSheets[0].insertRule(bg);
+    }
+
     this.change_color = function(coloridx, colordef)
     {
         colordef = this.normalize_colordef(colordef);
@@ -1055,6 +1072,7 @@ function naoterm(params)
         debugwrite("change_color("+coloridx+","+colordef+")");
         const ruleList = document.styleSheets[0].cssRules;
         var ruleidx = 0;
+        var add_def = 0;
         for (const rule of ruleList) {
             if (rule.cssText.match(/^:root/)) {
                 var reg = new RegExp("--color"+coloridx+": [^;]+;");
@@ -1065,9 +1083,15 @@ function naoterm(params)
                 } else {
                     /* add a new color definition to the css */
                     str = str.replace(/} *$/, def + " }");
+                    debugwrite("add css color:\"<tt>" + def + "</tt>\"");
+                    this.colordefs_init = 0;
+                    add_def = coloridx;
                 }
+                debugwrite("css color:\"<tt>" + str + "</tt>\"");
                 document.styleSheets[0].deleteRule(ruleidx);
                 document.styleSheets[0].insertRule(str, ruleidx);
+                if (add_def > 0)
+                    this.add_ttyscreen_color_def(coloridx);
                 return;
             }
             ruleidx++;
