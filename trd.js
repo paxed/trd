@@ -1,7 +1,7 @@
 
 var NAOTERM_URL = "";
 var DEBUG_INFO = 0; /* 0: off, 1: on, clear every frame, 2: on, concatenate */
-var SPEED = { min: 20, current: 500, max: 1000, step: 20 };
+var SPEED = { min: 20, default: 500, max: 1000, step: 20 };
 var MAX_PAUSE = 1500;
 var PAUSE_INITIAL = 0;
 var CACHEFRAMES = { n_previous: 10, every_nth: 50, max: 500 };
@@ -73,7 +73,10 @@ function create_ui()
 
     btn = $("speed_slider");
     if (btn) {
-        btn.innerHTML = "<span id='speed_slider'>Speed: <input id='speed_slider_input' type='range' min='"+SPEED.min+"' max='"+SPEED.max+"' value='"+SPEED.current+"' step='"+SPEED.step+"'></input><span id='speed_display'></span></span>";
+        if (SPEED.current == undefined)
+            SPEED.current = SPEED.default;
+
+        btn.innerHTML = "<span id='speed_slider'>Speed: <input id='speed_slider_input' type='range' min='"+SPEED.min+"' max='"+SPEED.max+"' value='"+SPEED.current+"' step='"+SPEED.step+"' oninput='change_playback_speed(1)'></input><span id='speed_display'></span></span>";
     }
 
     btn = $("btn_first");
@@ -83,12 +86,12 @@ function create_ui()
 
     btn = $("btn_prev");
     if (btn) {
-        btn.innerHTML = '<button type="button" onclick="show_prev_frame();">&lt;</button>';
+        btn.innerHTML = '<button type="button" onclick="show_prev_frame();" id="prev_button">&lt;</button>';
     }
 
     btn = $("btn_next");
     if (btn) {
-        btn.innerHTML = '<button type="button" onclick="show_next_frame();">&gt;</button>';
+        btn.innerHTML = '<button type="button" onclick="show_next_frame();" id="next_button">&gt;</button>';
     }
 
     btn = $("btn_last"); /* or as close as we can get ... */
@@ -125,6 +128,55 @@ function create_ui()
     toggle_pause_btn();
 
     trd_ui_created = 1;
+
+    window.addEventListener("keyup", handle_keys);
+}
+
+function handle_keys()
+{
+    if (event.defaultPrevented) {
+        return;
+    }
+
+    switch (event.key) {
+    case ' ': /* play/pause */
+        btn = $('pause_button');
+        if (btn)
+            btn.click();
+        break;
+    case '>': /* next */
+        btn = $('next_button');
+        if (btn)
+            btn.click();
+        break;
+    case '<': /* prev */
+        btn = $('prev_button');
+        if (btn)
+            btn.click();
+        break;
+    case '.': /* toggle speed */
+        btn = $('speed_slider_input');
+        if (!btn)
+            break;
+        if (SPEED.temp == undefined) {
+            SPEED.temp = SPEED.current;
+            SPEED.current = SPEED.min;
+        } else if (SPEED.current != SPEED.temp) {
+            SPEED.current = SPEED.temp;
+            SPEED.temp = undefined;
+        } else {
+            SPEED.current = SPEED.default;
+            SPEED.temp = undefined;
+        }
+        btn.value = SPEED.current;
+        change_playback_speed(0);
+        break;
+    default:
+        //console.log("KEY:" + event.key);
+        break;
+    }
+
+    event.preventDefault();
 }
 
 function show_current_frame()
@@ -347,6 +399,32 @@ function playback_timer()
     playback_timer_count--;
 }
 
+function change_playback_speed(reset_temp_speed)
+{
+    btn = $("speed_slider_input");
+    if (btn)
+        SPEED.current = btn.value;
+
+    btn = $("speed_display");
+    if (btn)
+	btn.innerHTML = SPEED.current.toString();
+
+    if (reset_temp_speed)
+        SPEED.temp = undefined;
+
+    if (ttyrec_frames[current_frame] == undefined)
+        return;
+
+    var frame = ttyrec_frames[current_frame];
+
+    var delay = (frame.delay + 1) * SPEED.current;
+    if (delay > MAX_PAUSE)
+        delay = MAX_PAUSE;
+
+    playback_timer_count++;
+    setTimeout(playback_timer, delay);
+}
+
 function playback_ttyrec()
 {
     if (paused)
@@ -356,22 +434,7 @@ function playback_ttyrec()
         load_random_ttyrec();
         return;
     }
-
-    if (ttyrec_frames[current_frame] == undefined)
-        return;
-
-    var frame = ttyrec_frames[current_frame];
-
-    btn = $("speed_slider_input");
-    if (btn)
-        SPEED.current = btn.value;
-
-    var delay = (frame.delay + 1) * SPEED.current;
-    if (delay > MAX_PAUSE)
-        delay = MAX_PAUSE;
-
-    playback_timer_count++;
-        setTimeout(playback_timer, delay);
+    change_playback_speed();
 }
 
 function getCSStext()
