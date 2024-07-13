@@ -171,6 +171,13 @@ function handle_keys()
         btn.value = SPEED.current;
         change_playback_speed(0);
         break;
+    case '?': /* toggle help */
+        if (window.location.hash == "#help") {
+            window.location.hash = "";
+        } else {
+            window.location.hash = "help";
+        }
+        break;
     default:
         //console.log("KEY:" + event.key);
         break;

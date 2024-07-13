@@ -89,3 +89,16 @@ button.selected {
 .ttyscreen .b13 { background-color: var(--color13); }
 .ttyscreen .b14 { background-color: var(--color14); }
 .ttyscreen .b15 { background-color: var(--color15); }
+
+#helpkey {
+    float: right;
+}
+#help {
+    display:none;
+}
+#help:target {
+    display:block;
+    float: right;
+    padding: 0.5em;
+    border: 2px solid gray;
+}
